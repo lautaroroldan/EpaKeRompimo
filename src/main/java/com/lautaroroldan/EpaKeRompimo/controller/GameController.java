@@ -1,7 +1,9 @@
 package com.lautaroroldan.EpaKeRompimo.controller;
 
 import com.lautaroroldan.EpaKeRompimo.cheapshark.CheapSharkDealDTO;
+import com.lautaroroldan.EpaKeRompimo.cheapshark.CheapSharkGameDTO;
 import com.lautaroroldan.EpaKeRompimo.cheapshark.CheapSharkStoreDTO;
+import com.lautaroroldan.EpaKeRompimo.service.CheapSharkGameService;
 import com.lautaroroldan.EpaKeRompimo.service.CheapSharkService;
 import com.lautaroroldan.EpaKeRompimo.service.CheapSharkStoreService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,13 +20,15 @@ import java.util.List;
 public class GameController {
     private final CheapSharkService cheapSharkService;
     private final CheapSharkStoreService cheapSharkStoresService;
+    private final CheapSharkGameService cheapSharkGameService;
     private static final Logger log =
             LoggerFactory.getLogger(GameController.class);
 
 
-    public GameController(CheapSharkService cheapSharkService, CheapSharkStoreService cheapSharkStoresService) {
+    public GameController(CheapSharkService cheapSharkService, CheapSharkStoreService cheapSharkStoresService, CheapSharkGameService cheapSharkGameService) {
         this.cheapSharkService = cheapSharkService;
         this.cheapSharkStoresService = cheapSharkStoresService;
+        this.cheapSharkGameService = cheapSharkGameService;
     }
 
     @GetMapping("/search")
@@ -38,5 +42,10 @@ public class GameController {
     @GetMapping("/stores")
     public List<CheapSharkStoreDTO> searchStores(){
         return cheapSharkStoresService.searchStores();
+    }
+
+    @GetMapping("/games")
+    public List<CheapSharkGameDTO> listOfGames(@RequestParam String title){
+        return cheapSharkGameService.listOfGames(title);
     }
 }
