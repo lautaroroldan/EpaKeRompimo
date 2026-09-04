@@ -16,7 +16,7 @@ public class CheapSharkStoreService {
         this.client = cheapSharkClient;
     }
 
-    public List<CheapSharkStoreDTO> searchStores(){
+    public List<CheapSharkStoreDTO> getAllStores(){
         return client.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/stores")
