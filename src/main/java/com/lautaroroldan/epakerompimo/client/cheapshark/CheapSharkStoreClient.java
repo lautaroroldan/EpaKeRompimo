@@ -1,22 +1,23 @@
-package com.lautaroroldan.EpaKeRompimo.service;
+package com.lautaroroldan.epakerompimo.client.cheapshark;
 
-import com.lautaroroldan.EpaKeRompimo.cheapshark.CheapSharkStoreDTO;
+import com.lautaroroldan.epakerompimo.dto.cheapshark.CheapSharkStoreDTO;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
-@Service
-public class CheapSharkStoreService {
+@Component
+public class CheapSharkStoreClient {
 
     private final RestClient client;
 
-    public CheapSharkStoreService(RestClient cheapSharkClient) {
-        this.client = cheapSharkClient;
+    public CheapSharkStoreClient(@Qualifier("cheapSharkClient") RestClient client) {
+        this.client = client;
     }
 
-    public List<CheapSharkStoreDTO> getAllStores(){
+    public List<CheapSharkStoreDTO> getAllStores() {
         return client.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/stores")
@@ -25,5 +26,4 @@ public class CheapSharkStoreService {
                 .body(new ParameterizedTypeReference<List<CheapSharkStoreDTO>>() {
                 });
     }
-
 }

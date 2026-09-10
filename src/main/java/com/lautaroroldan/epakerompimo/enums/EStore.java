@@ -1,4 +1,4 @@
-package com.lautaroroldan.EpaKeRompimo.cheapshark.enums;
+package com.lautaroroldan.epakerompimo.enums;
 
 public enum EStore {
     STEAM("1"),

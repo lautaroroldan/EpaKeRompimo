@@ -1,21 +1,23 @@
-package com.lautaroroldan.EpaKeRompimo.service;
+package com.lautaroroldan.epakerompimo.client.cheapshark;
 
-import com.lautaroroldan.EpaKeRompimo.cheapshark.CheapSharkGameDTO;
+import com.lautaroroldan.epakerompimo.dto.cheapshark.CheapSharkGameDTO;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
-@Service
-public class CheapSharkGameService {
+@Component
+public class CheapSharkGameClient {
+
     private final RestClient client;
 
-    public CheapSharkGameService(RestClient client) {
+    public CheapSharkGameClient(@Qualifier("cheapSharkClient") RestClient client) {
         this.client = client;
     }
 
-    public List<CheapSharkGameDTO> listOfGames(String title){
+    public List<CheapSharkGameDTO> listOfGames(String title) {
         return client.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/games")

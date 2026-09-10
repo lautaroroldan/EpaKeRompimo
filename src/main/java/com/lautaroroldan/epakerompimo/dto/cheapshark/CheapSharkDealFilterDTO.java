@@ -1,6 +1,6 @@
-package com.lautaroroldan.EpaKeRompimo.cheapshark;
+package com.lautaroroldan.epakerompimo.dto.cheapshark;
 
-import com.lautaroroldan.EpaKeRompimo.cheapshark.enums.ESortByDeals;
+import com.lautaroroldan.epakerompimo.enums.ESortByDeals;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +28,7 @@ public record CheapSharkDealFilterDTO(
         if (storeIDs == null) storeIDs = "1,2,3,7,8,11,13,15,21,23,24,25,27";
         if (exact == null) exact = 1;
     }
+
     public Map<String, Object> toParamMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("title", title);
