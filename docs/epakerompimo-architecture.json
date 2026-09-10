@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arquitectura de EpaKeRompimo",
+    "output": "docs/epakerompimo-architecture.html",
+    "quality_profile": "showcase",
+    "viewBox": [1140, 520]
+  },
+  "components": [
+    { "id": "client", "type": "external", "label": "Frontend (futuro)", "sublabel": "web / móvil", "pos": [300, 40], "size": [160, 58] },
+    { "id": "controllers", "type": "backend", "label": "Controllers REST", "sublabel": "/api/deals · games · stores", "pos": [270, 176], "size": [220, 74] },
+    { "id": "exception", "type": "security", "label": "GlobalExceptionHandler", "sublabel": "400 · 502 · 500", "pos": [80, 384], "size": [190, 68] },
+    { "id": "swagger", "type": "external", "label": "Swagger UI", "sublabel": "/swagger-ui.html", "pos": [330, 420], "size": [160, 58] },
+    { "id": "cs_clients", "type": "backend", "label": "Adaptadores CheapShark", "sublabel": "Deal · Game · Store client", "pos": [560, 104], "size": [200, 62] },
+    { "id": "rawg_client", "type": "backend", "label": "RAWGClient", "sublabel": "search · DLC · detalle", "pos": [560, 360], "size": [200, 62] },
+    { "id": "cheapshark", "type": "external", "label": "CheapShark API", "sublabel": "api/1.0", "pos": [930, 106], "size": [170, 58] },
+    { "id": "rawg", "type": "external", "label": "RAWG API", "sublabel": "api.rawg.io", "pos": [930, 362], "size": [170, 58] }
+  ],
+  "connections": [
+    { "from": "client", "to": "controllers", "label": "HTTP / JSON", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelAt": [380, 143] },
+    { "from": "controllers", "to": "cs_clients", "label": "delega", "fromSide": "right", "toSide": "left" },
+    { "from": "controllers", "to": "rawg_client", "label": "delega", "fromSide": "right", "toSide": "left" },
+    { "from": "controllers", "to": "exception", "label": "errores de validación", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "from": "controllers", "to": "swagger", "label": "OpenAPI /v3/api-docs", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelAt": [452, 330] },
+    { "from": "cs_clients", "to": "cheapshark", "label": "GET /deals · /games · /stores", "fromSide": "right", "toSide": "left" },
+    { "from": "rawg_client", "to": "rawg", "label": "GET ?key=…", "fromSide": "right", "toSide": "left" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Capa de entrada", "items": ["Controllers REST provider-agnostic bajo /api", "Validación con Jakarta Bean Validation", "Swagger UI publica /v3/api-docs"] },
+    { "dot": "emerald", "title": "Integraciones externas", "items": ["CheapShark aporta deals, precios y tiendas", "RAWG aporta metadatos de juegos y DLC", "Un adaptador RestClient aislado por proveedor"] },
+    { "dot": "amber", "title": "Errores y configuración", "items": ["GlobalExceptionHandler unifica toda respuesta de error", "400 validación · 502 upstream · 500 inesperado", "RAWG_API_KEY y timeouts 5s/10s desde application.properties"] }
+  ]
+}
