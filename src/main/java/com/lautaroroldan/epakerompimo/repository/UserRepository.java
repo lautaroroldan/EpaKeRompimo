@@ -1,6 +1,6 @@
-package com.lautaroroldan.epakerompimo.user.repository;
+package com.lautaroroldan.epakerompimo.repository;
 
-import com.lautaroroldan.epakerompimo.user.entity.User;
+import com.lautaroroldan.epakerompimo.entity.User;
 import org.springframework.data.repository.CrudRepository;
 
 public interface UserRepository extends CrudRepository<User, Long> {

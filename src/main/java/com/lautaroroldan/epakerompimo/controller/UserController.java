@@ -1,7 +1,7 @@
-package com.lautaroroldan.epakerompimo.user.controller;
+package com.lautaroroldan.epakerompimo.controller;
 
-import com.lautaroroldan.epakerompimo.user.entity.User;
-import com.lautaroroldan.epakerompimo.user.service.UserServiceManager;
+import com.lautaroroldan.epakerompimo.entity.User;
+import com.lautaroroldan.epakerompimo.service.UserServiceManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -36,12 +36,6 @@ public class UserController {
     @Transactional
     public User update(@PathVariable Long id, @RequestBody User user) {
         return this.userServiceManager.update(id, user);
-    }
-
-    @GetMapping("/exists/{username}")
-    @Transactional(readOnly = true)
-    public boolean existsByUsername(@PathVariable String username) {
-        return this.userServiceManager.existsByUsername(username);
     }
 
     @DeleteMapping("/{id}")

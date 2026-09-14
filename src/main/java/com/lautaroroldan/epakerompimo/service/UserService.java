@@ -1,6 +1,6 @@
-package com.lautaroroldan.epakerompimo.user.service;
+package com.lautaroroldan.epakerompimo.service;
 
-import com.lautaroroldan.epakerompimo.user.entity.User;
+import com.lautaroroldan.epakerompimo.entity.User;
 
 import java.util.List;
 
