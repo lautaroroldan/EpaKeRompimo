@@ -276,12 +276,12 @@ cd EpaKeRompimo
 ### 2. Configure your environment
 
 ```bash
-cp .env.example .env
-# then edit .env and fill in your values
+cp .env.example backend/.env
+# then edit backend/.env and fill in your values
 ```
 
 The optional `.env` file is loaded automatically in development
-(`spring.config.import=optional:file:.env[.properties]`) and is git-ignored.
+(`spring.config.import=optional:file:.env[.properties]`, resolved from `backend/`) and is git-ignored.
 In production or CI, export the same variables as real environment variables.
 
 ### 3. Run
@@ -289,12 +289,14 @@ In production or CI, export the same variables as real environment variables.
 On Linux/macOS:
 
 ```bash
+cd backend
 ./mvnw spring-boot:run
 ```
 
 On Windows:
 
 ```powershell
+cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -313,7 +315,7 @@ Relevant `application.properties` keys:
 ## Project structure
 
 ```
-com.lautaroroldan.epakerompimo
+backend/src/main/java/com/lautaroroldan/epakerompimo
 ├── EpaKeRompimoApplication.java
 ├── config/                 # beans and clients wiring
 │   └── ApiClientConfig.java
@@ -346,9 +348,10 @@ com.lautaroroldan.epakerompimo
 
 ```bash
 # Linux/macOS
-./mvnw test
+cd backend && ./mvnw test
 
 # Windows
+cd backend
 .\mvnw.cmd test
 ```
 
