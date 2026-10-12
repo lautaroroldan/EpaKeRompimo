@@ -1,11 +1,12 @@
 package com.lautaroroldan.epakerompimo.controller;
 
-import com.lautaroroldan.epakerompimo.client.cheapshark.CheapSharkDealClient;
-import com.lautaroroldan.epakerompimo.dto.cheapshark.CheapSharkDealDTO;
-import com.lautaroroldan.epakerompimo.dto.cheapshark.CheapSharkDealFilterDTO;
+import com.lautaroroldan.epakerompimo.dto.GameWithPricesDTO;
+import com.lautaroroldan.epakerompimo.service.GameSearchService;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -14,14 +15,13 @@ import java.util.List;
 @RequestMapping("/api/deals")
 public class DealController {
 
-    private final CheapSharkDealClient cheapSharkDealClient;
-
-    public DealController(CheapSharkDealClient cheapSharkDealClient) {
-        this.cheapSharkDealClient = cheapSharkDealClient;
-    }
+    @Autowired
+    private GameSearchService gameSearchService;
 
     @GetMapping("/")
-    public List<CheapSharkDealDTO> searchDeals(@ModelAttribute CheapSharkDealFilterDTO filters) {
-        return cheapSharkDealClient.searchDeals(filters);
+    public List<GameWithPricesDTO> findDeals(@RequestParam @NotBlank String country,
+                                             @RequestParam Integer offset,
+                                             @RequestParam Integer limit) {
+        return gameSearchService.findDeals(country, offset, limit);
     }
 }

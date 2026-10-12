@@ -19,6 +19,14 @@ public class ApiClientConfig {
                 .build();
     }
 
+    @Bean("ITADClient")
+    public RestClient itadClient(RestClient.Builder builder, @Value("${itad.api.key}") String apiKey) {
+        return builder
+                .baseUrl("https://api.isthereanydeal.com/")
+                .defaultHeader("ITAD-API-Key", apiKey)
+                .build();
+    }
+
     @Bean("rawgClient")
     public RestClient rawgClient(
             RestClient.Builder builder,
