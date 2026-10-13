@@ -109,7 +109,7 @@ public class ITADProvider extends AbstractApiClient implements PriceProvider, Ga
     }
 
     private GameDTO toGameDTO(ITADGameResponse game) {
-        return new GameDTO(game.id(), game.title(), game.slug(), game.type(), game.assets().banner145(), "", new String[]{""});
+        return new GameDTO(game.id(), game.title(), game.slug(), game.type(), game.assets().banner300(), "", new String[]{""});
     }
 
 
