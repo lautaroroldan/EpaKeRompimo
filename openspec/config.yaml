@@ -1,0 +1,57 @@
+schema: spec-driven
+
+context: |
+  Project: EpaKeRompimo REST API backend.
+  Stack: Java 21, Spring Boot 4.1.1, Spring MVC, RestClient, Maven wrapper.
+  Architecture: Layered controllers and provider-specific external API adapters.
+  Providers: CheapShark for deals/stores and RAWG for game metadata.
+  Conventions: package-by-layer with per-provider client and DTO subpackages.
+  Configuration: application.properties with optional .env import and environment secrets.
+  Persistence: Hybrid OpenSpec files plus Engram project observations.
+
+strict_tdd: true
+
+testing:
+  detected: 2026-09-15
+  workspace_test_command: ".\\mvnw.cmd test"
+  projects:
+    - path: "."
+      stack: "Java 21 / Spring Boot 4.1.1 / Maven"
+      test_command: ".\\mvnw.cmd test"
+      framework: "JUnit 5 + Spring Boot Test"
+      test_layers:
+        unit: "JUnit 5 available; no focused unit tests currently detected"
+        integration: "SpringBootTest context smoke test available"
+        e2e: "Not detected"
+      coverage:
+        available: false
+        command: ""
+      quality:
+        linter: "Not detected"
+        type_checker: "javac via Maven compiler plugin"
+        formatter: "Not detected"
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes.
+  specs:
+    - Use Given/When/Then for scenarios.
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY).
+  design:
+    - Document architecture decisions with rationale.
+    - Include sequence diagrams for complex provider flows.
+  tasks:
+    - Group by phase and use hierarchical numbering.
+    - Keep tasks completable in one session.
+  apply:
+    guidelines:
+      - Follow existing Java/Spring package and DTO conventions.
+      - Keep external provider access behind client adapters.
+    tdd: true
+    test_command: ".\\mvnw.cmd test"
+  verify:
+    test_command: ".\\mvnw.cmd test"
+    build_command: ".\\mvnw.cmd verify"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas.
