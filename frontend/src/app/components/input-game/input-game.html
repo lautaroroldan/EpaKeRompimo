@@ -1,0 +1,30 @@
+<div class="relative flex flex-col gap-2 max-w-md">
+    <input type="text" hlmInput [value]="input" (input)="onInputChange($event)" class="border-b" />
+
+    <ul class="absolute top-full left-0 right-0 z-50 mt-1 max-h-96 w-full bg-white shadow-md overflow-y-auto p-2">
+        @if (games().length > 0) {
+        @for (game of games(); track game.game.id) {
+        <li
+            class="p-2 flex items-center gap-2 border-b border-gray-200 hover:bg-accent hover:outline-2 rounded-xl justify-between">
+            <div class="flex gap-2 items-center">
+                <img [src]="game.game.imageUrl ?? 'https://static.vecteezy.com/system/resources/thumbnails/022/059/000/small_2x/no-image-available-icon-vector.jpg'"
+                    alt="{{ game.game.title }}" class="w-24 h-11 rounded-md object-cover shrink-0" />
+                <h3>{{ game.game.title }}</h3>
+            </div>
+            @if (game.prices[0]; as price) {
+            @if (price.salePrice === 0) {
+            <p>Gratis</p>
+            }@else {
+            <p>${{price.salePrice}}</p>
+            }
+            } @else {
+            <p>sin precio</p>
+            }
+        </li>
+        }
+        }
+        @else {
+        <li>No games found</li>
+        }
+    </ul>
+</div>
