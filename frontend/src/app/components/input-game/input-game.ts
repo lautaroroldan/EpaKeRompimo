@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { GameWithPrices } from '../../interfaces/Game';
 import { GameService } from '../../services/game-service';
-import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, of, Subject, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 
@@ -23,7 +23,13 @@ export class InputGame {
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        switchMap(term => this.gameService.searchGame(term, this.country)),
+        switchMap(term => {
+          const title = term.trim();
+          if (!title) return of([] as GameWithPrices[]);   // vacío: no llama al backend
+          return this.gameService.searchGame(title, this.country).pipe(
+            catchError(() => of([] as GameWithPrices[]))   // si falla, sigue funcionando
+          );
+        }),
         takeUntilDestroyed(),
       ).subscribe(result => this.games.set(result))
   }

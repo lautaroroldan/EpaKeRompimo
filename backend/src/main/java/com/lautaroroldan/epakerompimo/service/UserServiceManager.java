@@ -1,17 +1,25 @@
 package com.lautaroroldan.epakerompimo.service;
 
+import com.lautaroroldan.epakerompimo.dto.user.LoginRequest;
+import com.lautaroroldan.epakerompimo.dto.user.UserRequest;
+import com.lautaroroldan.epakerompimo.dto.user.UserResponse;
+import com.lautaroroldan.epakerompimo.dto.user.UserUpdateRequest;
 import com.lautaroroldan.epakerompimo.entity.User;
+import com.lautaroroldan.epakerompimo.exceptions.InvalidCredentialsException;
+import com.lautaroroldan.epakerompimo.exceptions.UserNotFoundException;
+import com.lautaroroldan.epakerompimo.exceptions.UsernameAlreadyExistsException;
 import com.lautaroroldan.epakerompimo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-public class UserServiceManager implements UserService{
-    @Autowired
-    private UserRepository userRepository;
+@Transactional(readOnly = true)
+public class UserServiceManager implements UserService {
+
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserServiceManager(UserRepository userRepository, PasswordEncoder passwordEncoder) {
@@ -20,48 +28,85 @@ public class UserServiceManager implements UserService{
     }
 
     @Override
-    public List<User> findAll() {
-        return (List<User>) this.userRepository.findAll();
+    public List<UserResponse> findAll() {
+        return userRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
-    public User findById(Long id) {
-        return this.userRepository.findById(id).
-                orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    public UserResponse findById(Long id) {
+        return toResponse(getOrThrow(id));
     }
 
     @Override
-    public User save(User user) {
-        if (this.userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("User already exists with username: " + user.getUsername());
+    @Transactional
+    public UserResponse create(UserRequest request) {
+        if (userRepository.existsByUsername(request.username())) {
+            throw new UsernameAlreadyExistsException(request.username());
         }
 
-        user.setPassword(
-                passwordEncoder.encode(user.getPassword())
-        );
+        User user = new User();
+        user.setUsername(request.username());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setIcon(request.icon());
 
-        return this.userRepository.save(user);
+        return toResponse(userRepository.save(user));
     }
 
     @Override
-    public User update(Long id, User user) {
-        User existingUser = this.userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    @Transactional
+    public UserResponse update(Long id, UserUpdateRequest request) {
+        User user = getOrThrow(id);
 
-        existingUser.setUsername(user.getUsername());
-        existingUser.setPassword(user.getPassword());
-        existingUser.setIcon(user.getIcon());
+        boolean cambioUsername = !user.getUsername().equals(request.username());
+        if (cambioUsername && userRepository.existsByUsername(request.username())) {
+            throw new UsernameAlreadyExistsException(request.username());
+        }
 
-        return this.userRepository.save(existingUser);
+        user.setUsername(request.username());
+        user.setIcon(request.icon());
+
+        // Si no mandan password (o viene vacía) se conserva la actual
+        if (request.password() != null && !request.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.password()));
+        }
+
+        return toResponse(user);
+    }
+
+    @Override
+    public UserResponse login(LoginRequest loginRequest) {
+        User user = userRepository.findByUsername(loginRequest.username())
+                .orElseThrow(InvalidCredentialsException::new);
+
+        if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
+            throw new InvalidCredentialsException();
+        }
+
+        return toResponse(user);
     }
 
     @Override
     public boolean existsByUsername(String username) {
-        return this.userRepository.existsByUsername(username);
+        return userRepository.existsByUsername(username);
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
-        this.userRepository.deleteById(id);
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
+        userRepository.deleteById(id);
+    }
+
+    private User getOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    private UserResponse toResponse(User user) {
+        return new UserResponse(user.getIdUser(), user.getUsername(), user.getIcon());
     }
 }

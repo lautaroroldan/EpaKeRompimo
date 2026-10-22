@@ -1,0 +1,105 @@
+<section class="mx-auto w-full max-w-md p-6">
+    <h1 class="mb-6 text-2xl font-semibold">Mi cuenta</h1>
+
+    @if (loading()) {
+    <p class="text-sm text-muted-foreground">Cargando…</p>
+    } @else if (session(); as s) {
+    <div class="mb-6 flex items-center gap-4">
+        <app-user-avatar [icon]="s.icon" [username]="s.username" size="lg" />
+        <p class="text-lg font-medium">{{ s.username }}</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-4" novalidate>
+        @let formStatus = status();
+        @let u = form.controls.username;
+        @let i = form.controls.icon;
+        @let p = form.controls.password;
+        @let c = form.controls.confirmPassword;
+
+        <div class="flex flex-col gap-1">
+            <label for="username" class="text-sm font-medium">Nombre de usuario</label>
+            <input id="username" hlmInput type="text" formControlName="username" autocomplete="username" />
+            @if (u.pending) {
+            <p class="text-sm text-muted-foreground">Comprobando disponibilidad…</p>
+            } @else if (u.touched || u.dirty) {
+            @if (u.hasError('required')) {
+            <p class="text-sm text-destructive">El nombre de usuario no puede quedar vacío.</p>
+            } @else if (u.hasError('maxlength')) {
+            <p class="text-sm text-destructive">Máximo 50 caracteres.</p>
+            } @else if (u.hasError('usernameTaken')) {
+            <p class="text-sm text-destructive">Ese nombre de usuario ya está en uso.</p>
+            }
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="icon" class="text-sm font-medium">Imagen de perfil (URL)</label>
+            <input id="icon" hlmInput type="url" formControlName="icon" placeholder="https://…" />
+            @if ((i.touched || i.dirty) && i.invalid) {
+            <p class="text-sm text-destructive">Ingresá una URL válida que empiece con http:// o https://</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="password" class="text-sm font-medium">Nueva contraseña</label>
+            <input id="password" hlmInput type="password" formControlName="password"
+                autocomplete="new-password" placeholder="Dejala vacía para no cambiarla" />
+            @if ((p.touched || p.dirty) && p.invalid) {
+            <p class="text-sm text-destructive">Tiene que tener entre 8 y 72 caracteres.</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="confirmPassword" class="text-sm font-medium">Repetir nueva contraseña</label>
+            <input id="confirmPassword" hlmInput type="password" formControlName="confirmPassword"
+                autocomplete="new-password" />
+            @if ((c.touched || c.dirty) && form.hasError('passwordsMismatch')) {
+            <p class="text-sm text-destructive">Las contraseñas no coinciden.</p>
+            }
+        </div>
+
+        @if (error(); as msg) {
+        <p class="text-sm text-destructive" role="alert">{{ msg }}</p>
+        }
+        @if (success(); as msg) {
+        <p class="text-sm" role="status">{{ msg }}</p>
+        }
+
+        <button type="submit" [disabled]="saving() || formStatus === 'PENDING'"
+            class="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50">
+            {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+    </form>
+
+    <div class="mt-10 border-t border-border pt-6">
+        <h2 class="mb-1 text-lg font-medium text-destructive">Eliminar cuenta</h2>
+        <p class="mb-4 text-sm text-muted-foreground">Esta acción no se puede deshacer.</p>
+
+        @if (!confirmingDelete()) {
+        <button type="button" (click)="askDelete()"
+            class="inline-flex h-9 items-center rounded-lg border border-destructive px-4 text-sm font-medium text-destructive hover:bg-destructive/10">
+            Eliminar mi cuenta
+        </button>
+        } @else {
+        <div class="flex flex-col gap-3 rounded-lg border border-destructive p-4">
+            <p class="text-sm">
+                ¿Seguro que querés eliminar la cuenta <strong>{{ s.username }}</strong>?
+            </p>
+            @if (deleteError(); as msg) {
+            <p class="text-sm text-destructive" role="alert">{{ msg }}</p>
+            }
+            <div class="flex gap-2">
+                <button type="button" (click)="confirmDelete()" [disabled]="deleting()"
+                    class="inline-flex h-9 items-center rounded-lg bg-destructive px-4 text-sm font-medium text-white disabled:opacity-50">
+                    {{ deleting() ? 'Eliminando…' : 'Sí, eliminar' }}
+                </button>
+                <button type="button" (click)="cancelDelete()" [disabled]="deleting()"
+                    class="inline-flex h-9 items-center rounded-lg border border-input px-4 text-sm hover:bg-accent">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+    }
+</section>

@@ -27,6 +27,11 @@
 			<name>Lautaro Roldan</name>
 			<email>lautaronicolasroldan@gmail.com</email>
 		</developer>
+		<developer>
+			<id>pablowalter</id>
+			<name>Pablo Walter</name>
+			<email>pablo.walter.quiroga11@gmail.com</email>
+		</developer>
 	</developers>
 	<scm>
 		<connection>scm:git:https://github.com/lautaroroldan/EpaKeRompimo.git</connection>
@@ -102,6 +107,22 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId><version>0.12.6</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.12.6</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.12.6</version>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 

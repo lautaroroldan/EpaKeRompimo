@@ -1,0 +1,34 @@
+<header class="border-b border-border bg-background">
+    <div class="mx-auto flex max-w-5xl items-center gap-4 p-3">
+        <a routerLink="/" class="shrink-0 font-semibold">EpaKeRompimo</a>
+
+        <!-- El buscador es público: se ve con o sin sesión -->
+        <div class="flex-1">
+            <app-input-game></app-input-game>
+        </div>
+
+        <nav class="flex shrink-0 items-center gap-2">
+            @if (ready()) {
+            @if (auth.session(); as s) {
+            <a routerLink="/cuenta" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-accent">
+                <app-user-avatar [icon]="s.icon" [username]="s.username" />
+                <span class="hidden text-sm sm:inline">{{ s.username }}</span>
+            </a>
+            <button type="button" (click)="logout()"
+                class="inline-flex h-8 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent">
+                Salir
+            </button>
+            } @else {
+            <a routerLink="/login"
+                class="inline-flex h-8 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent">
+                Ingresar
+            </a>
+            <a routerLink="/registro"
+                class="inline-flex h-8 items-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground">
+                Crear cuenta
+            </a>
+            }
+            }
+        </nav>
+    </div>
+</header>

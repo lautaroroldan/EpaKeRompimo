@@ -1,0 +1,48 @@
+<section class="mx-auto w-full max-w-md p-6">
+    <h1 class="mb-1 text-2xl font-semibold">Ingresar</h1>
+    <p class="mb-6 text-sm text-muted-foreground">
+        Para buscar juegos no necesitás cuenta. Ingresá para manejar tu perfil.
+    </p>
+
+    @if (expired) {
+    <p class="mb-4 rounded-lg border border-border bg-muted p-3 text-sm">
+        Tu sesión venció. Ingresá de nuevo.
+    </p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+        @let u = form.controls.username;
+        @let p = form.controls.password;
+
+        <div class="flex flex-col gap-1">
+            <label for="username" class="text-sm font-medium">Nombre de usuario</label>
+            <input id="username" hlmInput type="text" formControlName="username" autocomplete="username" />
+            @if (u.touched && u.hasError('required')) {
+            <p class="text-sm text-destructive">Ingresá tu nombre de usuario.</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="password" class="text-sm font-medium">Contraseña</label>
+            <input id="password" hlmInput type="password" formControlName="password"
+                autocomplete="current-password" />
+            @if (p.touched && p.hasError('required')) {
+            <p class="text-sm text-destructive">Ingresá tu contraseña.</p>
+            }
+        </div>
+
+        @if (error(); as msg) {
+        <p class="text-sm text-destructive" role="alert">{{ msg }}</p>
+        }
+
+        <button type="submit" [disabled]="loading()"
+            class="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50">
+            {{ loading() ? 'Ingresando…' : 'Ingresar' }}
+        </button>
+    </form>
+
+    <p class="mt-6 text-sm text-muted-foreground">
+        ¿No tenés cuenta?
+        <a routerLink="/registro" class="font-medium text-foreground underline">Crear cuenta</a>
+    </p>
+</section>
