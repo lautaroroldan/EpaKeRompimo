@@ -1,0 +1,76 @@
+<section class="mx-auto w-full max-w-md p-6">
+    <h1 class="mb-1 text-2xl font-semibold">Crear cuenta</h1>
+    <p class="mb-6 text-sm text-muted-foreground">
+        Para buscar juegos no necesitás cuenta. Creala para tener tu perfil.
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+        @let formStatus = status();
+        @let u = form.controls.username;
+        @let p = form.controls.password;
+        @let c = form.controls.confirmPassword;
+        @let i = form.controls.icon;
+
+        <div class="flex flex-col gap-1">
+            <label for="username" class="text-sm font-medium">Nombre de usuario</label>
+            <input id="username" hlmInput type="text" formControlName="username" autocomplete="username" />
+            @if (u.pending) {
+            <p class="text-sm text-muted-foreground">Comprobando disponibilidad…</p>
+            } @else if (u.touched || u.dirty) {
+            @if (u.hasError('required')) {
+            <p class="text-sm text-destructive">Elegí un nombre de usuario.</p>
+            } @else if (u.hasError('maxlength')) {
+            <p class="text-sm text-destructive">Máximo 50 caracteres.</p>
+            } @else if (u.hasError('usernameTaken')) {
+            <p class="text-sm text-destructive">Ese nombre de usuario ya está en uso.</p>
+            }
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="password" class="text-sm font-medium">Contraseña</label>
+            <input id="password" hlmInput type="password" formControlName="password"
+                autocomplete="new-password" />
+            @if (p.touched || p.dirty) {
+            @if (p.hasError('required')) {
+            <p class="text-sm text-destructive">Ingresá una contraseña.</p>
+            } @else if (p.hasError('minlength')) {
+            <p class="text-sm text-destructive">Tiene que tener al menos 8 caracteres.</p>
+            } @else if (p.hasError('maxlength')) {
+            <p class="text-sm text-destructive">Máximo 72 caracteres.</p>
+            }
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="confirmPassword" class="text-sm font-medium">Repetir contraseña</label>
+            <input id="confirmPassword" hlmInput type="password" formControlName="confirmPassword"
+                autocomplete="new-password" />
+            @if ((c.touched || c.dirty) && form.hasError('passwordsMismatch')) {
+            <p class="text-sm text-destructive">Las contraseñas no coinciden.</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="icon" class="text-sm font-medium">Imagen de perfil (opcional)</label>
+            <input id="icon" hlmInput type="url" formControlName="icon" placeholder="https://…" />
+            @if ((i.touched || i.dirty) && i.invalid) {
+            <p class="text-sm text-destructive">Ingresá una URL válida que empiece con http:// o https://</p>
+            }
+        </div>
+
+        @if (error(); as msg) {
+        <p class="text-sm text-destructive" role="alert">{{ msg }}</p>
+        }
+
+        <button type="submit" [disabled]="loading() || formStatus === 'PENDING'"
+            class="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50">
+            {{ loading() ? 'Creando cuenta…' : 'Crear cuenta' }}
+        </button>
+    </form>
+
+    <p class="mt-6 text-sm text-muted-foreground">
+        ¿Ya tenés cuenta?
+        <a routerLink="/login" class="font-medium text-foreground underline">Ingresar</a>
+    </p>
+</section>
