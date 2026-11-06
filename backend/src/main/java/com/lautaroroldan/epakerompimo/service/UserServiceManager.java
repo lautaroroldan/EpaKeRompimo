@@ -8,6 +8,8 @@ import com.lautaroroldan.epakerompimo.entity.User;
 import com.lautaroroldan.epakerompimo.exceptions.InvalidCredentialsException;
 import com.lautaroroldan.epakerompimo.exceptions.UserNotFoundException;
 import com.lautaroroldan.epakerompimo.exceptions.UsernameAlreadyExistsException;
+import com.lautaroroldan.epakerompimo.repository.FavoriteEnterpriseRepository;
+import com.lautaroroldan.epakerompimo.repository.FavoriteGameRepository;
 import com.lautaroroldan.epakerompimo.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,10 +22,17 @@ import java.util.List;
 public class UserServiceManager implements UserService {
 
     private final UserRepository userRepository;
+    private final FavoriteGameRepository favoriteGameRepository;
+    private final FavoriteEnterpriseRepository favoriteEnterpriseRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceManager(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceManager(UserRepository userRepository,
+                              FavoriteGameRepository favoriteGameRepository,
+                              FavoriteEnterpriseRepository favoriteEnterpriseRepository,
+                              PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.favoriteGameRepository = favoriteGameRepository;
+        this.favoriteEnterpriseRepository = favoriteEnterpriseRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -98,6 +107,9 @@ public class UserServiceManager implements UserService {
         if (!userRepository.existsById(id)) {
             throw new UserNotFoundException(id);
         }
+        // Primero los favoritos: tienen una clave foránea hacia el usuario
+        favoriteGameRepository.deleteByUser_IdUser(id);
+        favoriteEnterpriseRepository.deleteByUser_IdUser(id);
         userRepository.deleteById(id);
     }
 

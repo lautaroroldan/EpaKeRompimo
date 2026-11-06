@@ -1,0 +1,80 @@
+<section class="ml-auto mr-[20%] w-full max-w-2xl p-6">
+    <h1 class="mb-6 text-2xl font-semibold">Mis favoritos</h1>
+
+    @if (favorites.error(); as msg) {
+    <p class="mb-4 text-sm text-destructive" role="alert">{{ msg }}</p>
+    }
+
+    <h2 class="mb-3 text-lg font-medium">Juegos</h2>
+    @if (favorites.loading()) {
+    <p class="text-sm text-muted-foreground">Cargando…</p>
+    } @else if (favorites.games().length === 0) {
+    <p class="text-sm text-muted-foreground">
+        Todavía no guardaste juegos. Buscalos con el buscador y tocá la estrella ☆.
+    </p>
+    } @else {
+    <ul class="flex flex-col gap-2">
+        @for (fav of favorites.games(); track fav.id) {
+        @let best = cheapest(fav.prices);
+        <li class="flex items-center justify-between gap-3 rounded-xl border border-border p-2">
+            <div class="flex min-w-0 items-center gap-3">
+                <img [src]="fav.game?.imageUrl ?? noImage" [alt]="fav.game?.title ?? 'Sin imagen'"
+                    class="h-11 w-24 shrink-0 rounded-md object-cover" />
+                <div class="min-w-0">
+                    <h3 class="truncate">{{ fav.game?.title ?? 'Juego no disponible' }}</h3>
+                    <p class="text-sm text-muted-foreground">
+                        @if (best) {
+                        @if (best.salePrice === 0) {
+                        Gratis
+                        } @else {
+                        ${{ best.salePrice | number: '1.0-2' }}
+                        }
+                        · {{ best.store.name }}
+                        } @else {
+                        sin precio
+                        }
+                    </p>
+                </div>
+            </div>
+            <button type="button" (click)="favorites.removeGame(fav.itadGameId)" [disabled]="favorites.saving()"
+                class="inline-flex h-8 shrink-0 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent disabled:opacity-50">
+                Quitar
+            </button>
+        </li>
+        }
+    </ul>
+    }
+
+    <h2 class="mb-3 mt-10 text-lg font-medium">Empresas</h2>
+    @if (favorites.enterprises().length === 0) {
+    <p class="text-sm text-muted-foreground">Todavía no guardaste empresas.</p>
+    } @else {
+    <ul class="flex flex-col gap-2">
+        @for (e of favorites.enterprises(); track e.id) {
+        <li class="flex items-center justify-between gap-3 rounded-xl border border-border p-3">
+            <span>Empresa de RAWG #{{ e.rawgEnterpriseId }}</span>
+            <button type="button" (click)="favorites.removeEnterprise(e.rawgEnterpriseId)"
+                [disabled]="favorites.saving()"
+                class="inline-flex h-8 shrink-0 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent disabled:opacity-50">
+                Quitar
+            </button>
+        </li>
+        }
+    </ul>
+    }
+
+    <div class="mt-4 flex gap-2">
+        <input #enterpriseId hlmInput type="number" min="1" placeholder="ID de la empresa en RAWG" />
+        <button type="button" (click)="addEnterprise(enterpriseId.value); enterpriseId.value = ''"
+            [disabled]="favorites.saving()"
+            class="inline-flex h-9 shrink-0 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50">
+            Agregar
+        </button>
+    </div>
+    @if (enterpriseError(); as msg) {
+    <p class="mt-2 text-sm text-destructive" role="alert">{{ msg }}</p>
+    }
+    <p class="mt-2 text-xs text-muted-foreground">
+        Temporal: cuando esté la integración con RAWG, las empresas se van a buscar por nombre.
+    </p>
+</section>

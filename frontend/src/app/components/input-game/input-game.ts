@@ -4,10 +4,11 @@ import { GameService } from '../../services/game-service';
 import { catchError, debounceTime, distinctUntilChanged, of, Subject, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HlmInputImports } from '@spartan-ng/helm/input';
+import { FavoriteButton } from '../favorite-button/favorite-button';
 
 @Component({
   selector: 'app-input-game',
-  imports: [HlmInputImports,],
+  imports: [HlmInputImports, FavoriteButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './input-game.html',
   styleUrl: './input-game.css',

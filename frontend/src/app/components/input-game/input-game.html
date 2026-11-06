@@ -11,15 +11,18 @@
                     alt="{{ game.game.title }}" class="w-24 h-11 rounded-md object-cover shrink-0" />
                 <h3>{{ game.game.title }}</h3>
             </div>
-            @if (game.prices[0]; as price) {
-            @if (price.salePrice === 0) {
-            <p>Gratis</p>
-            }@else {
-            <p>${{price.salePrice}}</p>
-            }
-            } @else {
-            <p>sin precio</p>
-            }
+            <div class="flex items-center gap-2">
+                @if (game.prices[0]; as price) {
+                @if (price.salePrice === 0) {
+                <p>Gratis</p>
+                }@else {
+                <p>${{price.salePrice}}</p>
+                }
+                } @else {
+                <p>sin precio</p>
+                }
+                <app-favorite-button [itadGameId]="game.game.id" />
+            </div>
         </li>
         }
         }
