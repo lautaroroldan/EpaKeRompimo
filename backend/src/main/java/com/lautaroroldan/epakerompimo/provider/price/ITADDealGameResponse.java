@@ -1,7 +1,7 @@
 package com.lautaroroldan.epakerompimo.provider.price;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.lautaroroldan.epakerompimo.provider.info.ITADGameResponse;
+import com.lautaroroldan.epakerompimo.provider.gamecatalog.ITADGameResponse;
 
 public record ITADDealGameResponse(
         @JsonUnwrapped ITADGameResponse game,

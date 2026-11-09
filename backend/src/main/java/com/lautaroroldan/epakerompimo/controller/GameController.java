@@ -4,7 +4,6 @@ import com.lautaroroldan.epakerompimo.dto.GameWithPricesDTO;
 import com.lautaroroldan.epakerompimo.service.GameSearchService;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +18,13 @@ import java.util.List;
 @RequestMapping("/api/games")
 public class GameController {
 
-    @Autowired
-    private GameSearchService gameSearchService;
+    private final GameSearchService gameSearchService;
 
-    @GetMapping("/")
+    public GameController(GameSearchService gameSearchService) {
+        this.gameSearchService = gameSearchService;
+    }
+
+    @GetMapping("")
     public List<GameWithPricesDTO> gamePrices(@RequestParam @NotBlank String country,
                                               @RequestParam @NotBlank String title) {
         return gameSearchService.findPriceByGameTitle(title, country);

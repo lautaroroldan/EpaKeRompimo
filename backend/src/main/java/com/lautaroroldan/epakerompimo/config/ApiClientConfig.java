@@ -11,14 +11,6 @@ import java.util.Map;
 @Configuration
 public class ApiClientConfig {
 
-    @Bean("cheapSharkClient")
-    public RestClient cheapSharkClient(RestClient.Builder builder) {
-        return builder
-                .baseUrl("https://www.cheapshark.com/api/1.0")
-                .defaultHeader(HttpHeaders.USER_AGENT, "EpaKeRompimo/1.0 (lautaronicolasroldan@gmail.com)")
-                .build();
-    }
-
     @Bean("ITADClient")
     public RestClient itadClient(RestClient.Builder builder, @Value("${itad.api.key}") String apiKey) {
         return builder
@@ -27,7 +19,7 @@ public class ApiClientConfig {
                 .build();
     }
 
-    @Bean("rawgClient")
+    @Bean("RAWGClient")
     public RestClient rawgClient(
             RestClient.Builder builder,
             @Value("${rawg.api.key}") String apiKey
