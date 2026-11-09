@@ -3,9 +3,9 @@ schema: spec-driven
 context: |
   Project: EpaKeRompimo REST API backend.
   Stack: Java 21, Spring Boot 4.1.1, Spring MVC, RestClient, Maven wrapper.
-  Architecture: Layered controllers and provider-specific external API adapters.
-  Providers: CheapShark for deals/stores and RAWG for game metadata.
-  Conventions: package-by-layer with per-provider client and DTO subpackages.
+  Architecture: Layered controllers, service layer and provider-specific external API adapters.
+  Providers: ITAD for game catalog and prices, RAWG for game metadata.
+  Conventions: package-by-layer with per-provider provider and DTO subpackages.
   Configuration: application.properties with optional .env import and environment secrets.
   Persistence: Hybrid OpenSpec files plus Engram project observations.
 
