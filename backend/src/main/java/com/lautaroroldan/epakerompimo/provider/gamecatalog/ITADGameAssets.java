@@ -1,4 +1,4 @@
-package com.lautaroroldan.epakerompimo.provider.info;
+package com.lautaroroldan.epakerompimo.provider.gamecatalog;
 
 public record ITADGameAssets(
         String banner145,

@@ -5,8 +5,8 @@ import com.lautaroroldan.epakerompimo.dto.GameDTO;
 import com.lautaroroldan.epakerompimo.dto.GameWithPricesDTO;
 import com.lautaroroldan.epakerompimo.dto.PriceDTO;
 import com.lautaroroldan.epakerompimo.dto.StoreDTO;
-import com.lautaroroldan.epakerompimo.provider.info.GameInfoProvider;
-import com.lautaroroldan.epakerompimo.provider.info.ITADGameResponse;
+import com.lautaroroldan.epakerompimo.provider.gamecatalog.GameCatalogProvider;
+import com.lautaroroldan.epakerompimo.provider.gamecatalog.ITADGameResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class ITADProvider extends AbstractApiClient implements PriceProvider, GameInfoProvider {
+public class ITADProvider extends AbstractApiClient implements PriceProvider, GameCatalogProvider {
 
     private final RestClient client;
 
