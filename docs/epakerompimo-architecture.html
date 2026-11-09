@@ -5160,12 +5160,12 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
         <!-- Connection paths (before components for correct z-order) -->
         <path data-edge-from="client" data-edge-to="controllers" data-edge-label="HTTP / JSON" data-edge-key="0" data-composition-points="380,98;380,176" d="M 380 98 L 380 176" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="controllers" data-edge-to="cs_clients" data-edge-label="delega" data-edge-key="1" data-composition-points="490,206;525,206;525,135;560,135" d="M 490 206 L 517 206 Q 525 206 525 198 L 525 143 Q 525 135 533 135 L 560 135" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="controllers" data-edge-to="rawg_client" data-edge-label="delega" data-edge-key="2" data-composition-points="490,220;525,220;525,391;560,391" d="M 490 220 L 517 220 Q 525 220 525 228 L 525 383 Q 525 391 533 391 L 560 391" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="controllers" data-edge-to="itad_provider" data-edge-label="delega" data-edge-key="1" data-composition-points="490,206;525,206;525,135;560,135" d="M 490 206 L 517 206 Q 525 206 525 198 L 525 143 Q 525 135 533 135 L 560 135" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="controllers" data-edge-to="rawg_provider" data-edge-label="delega" data-edge-key="2" data-composition-points="490,220;525,220;525,391;560,391" d="M 490 220 L 517 220 Q 525 220 525 228 L 525 383 Q 525 391 533 391 L 560 391" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         <path data-edge-from="controllers" data-edge-to="exception" data-edge-label="errores de validación" data-edge-key="3" data-composition-points="380,250;380,317;175,317;175,384" d="M 380 250 L 380 309 Q 380 317 372 317 L 183 317 Q 175 317 175 325 L 175 384" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         <path data-edge-from="controllers" data-edge-to="swagger" data-edge-label="OpenAPI /v3/api-docs" data-edge-key="4" data-composition-points="380,250;380,335;410,335;410,420" d="M 380 250 L 380 327 Q 380 335 388 335 L 402 335 Q 410 335 410 343 L 410 420" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="cs_clients" data-edge-to="cheapshark" data-edge-label="GET /deals · /games · /stores" data-edge-key="5" data-composition-points="760,135;930,135" d="M 760 135 L 930 135" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="rawg_client" data-edge-to="rawg" data-edge-label="GET ?key=…" data-edge-key="6" data-composition-points="760,391;930,391" d="M 760 391 L 930 391" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="itad_provider" data-edge-to="itad" data-edge-label="POST /games/prices/v3" data-edge-key="5" data-composition-points="760,135;930,135" d="M 760 135 L 930 135" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="rawg_provider" data-edge-to="rawg" data-edge-label="GET ?key=…" data-edge-key="6" data-composition-points="760,391;930,391" d="M 760 391 L 930 391" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
 
         <!-- Components -->
         <g id="node-client" data-node-id="client" data-node-label="Frontend (futuro)" tabindex="0" role="button" aria-label="Focus Frontend (futuro), web / móvil, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="web / móvil" data-node-context="Architecture component">
@@ -5180,15 +5180,15 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="context" x="380" y="83" class="t-muted" font-size="9" text-anchor="middle">web / móvil</text>
         </g>
 
-        <g id="node-controllers" data-node-id="controllers" data-node-label="Controllers REST" tabindex="0" role="button" aria-label="Focus Controllers REST, /api/deals · games · stores, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="/api/deals · games · stores" data-node-context="Architecture component">
-          <title>Controllers REST · /api/deals · games · stores · Architecture component</title>
+        <g id="node-controllers" data-node-id="controllers" data-node-label="Controllers REST" tabindex="0" role="button" aria-label="Focus Controllers REST, /api/games / deals / details / users, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="/api/games / deals / details / users" data-node-context="Architecture component">
+          <title>Controllers REST · /api/games / deals / details / users · Architecture component</title>
           <rect x="270" y="176" width="220" height="74" rx="6" class="c-mask"/>
           <rect x="270" y="176" width="220" height="74" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(276 182) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="380" y="211" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Controllers REST</text>
-        <text data-detail="context" x="380" y="227" class="t-muted" font-size="9" text-anchor="middle">/api/deals · games · stores</text>
+        <text data-detail="context" x="380" y="227" class="t-muted" font-size="9" text-anchor="middle">/api/games / deals / details / users</text>
         </g>
 
         <g id="node-exception" data-node-id="exception" data-node-label="GlobalExceptionHandler" tabindex="0" role="button" aria-label="Focus GlobalExceptionHandler, 400 · 502 · 500, Architecture component" aria-pressed="false" data-node-kind="security" data-node-sublabel="400 · 502 · 500" data-node-context="Architecture component">
@@ -5215,38 +5215,38 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="context" x="410" y="463" class="t-muted" font-size="9" text-anchor="middle">/swagger-ui.html</text>
         </g>
 
-        <g id="node-cs_clients" data-node-id="cs_clients" data-node-label="Adaptadores CheapShark" tabindex="0" role="button" aria-label="Focus Adaptadores CheapShark, Deal · Game · Store client, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Deal · Game · Store client" data-node-context="Architecture component">
-          <title>Adaptadores CheapShark · Deal · Game · Store client · Architecture component</title>
+        <g id="node-itad_provider" data-node-id="itad_provider" data-node-label="ITADProvider" tabindex="0" role="button" aria-label="Focus ITADProvider, PriceProvider / GameCatalogProvider, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="PriceProvider / GameCatalogProvider" data-node-context="Architecture component">
+          <title>ITADProvider · PriceProvider / GameCatalogProvider · Architecture component</title>
           <rect x="560" y="104" width="200" height="62" rx="6" class="c-mask"/>
           <rect x="560" y="104" width="200" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(566 110) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="660" y="133" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Adaptadores CheapShark</text>
-        <text data-detail="context" x="660" y="149" class="t-muted" font-size="9" text-anchor="middle">Deal · Game · Store client</text>
+          <text data-node-label="" data-detail-anchor="" x="660" y="133" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">ITADProvider</text>
+        <text data-detail="context" x="660" y="149" class="t-muted" font-size="9" text-anchor="middle">PriceProvider / GameCatalogProvider</text>
         </g>
 
-        <g id="node-rawg_client" data-node-id="rawg_client" data-node-label="RAWGClient" tabindex="0" role="button" aria-label="Focus RAWGClient, search · DLC · detalle, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="search · DLC · detalle" data-node-context="Architecture component">
-          <title>RAWGClient · search · DLC · detalle · Architecture component</title>
+        <g id="node-rawg_provider" data-node-id="rawg_provider" data-node-label="RAWGProvider" tabindex="0" role="button" aria-label="Focus RAWGProvider, search / detail, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="search / detail" data-node-context="Architecture component">
+          <title>RAWGProvider · search / detail · Architecture component</title>
           <rect x="560" y="360" width="200" height="62" rx="6" class="c-mask"/>
           <rect x="560" y="360" width="200" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(566 366) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="660" y="389" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">RAWGClient</text>
-        <text data-detail="context" x="660" y="405" class="t-muted" font-size="9" text-anchor="middle">search · DLC · detalle</text>
+          <text data-node-label="" data-detail-anchor="" x="660" y="389" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">RAWGProvider</text>
+        <text data-detail="context" x="660" y="405" class="t-muted" font-size="9" text-anchor="middle">search / detail</text>
         </g>
 
-        <g id="node-cheapshark" data-node-id="cheapshark" data-node-label="CheapShark API" tabindex="0" role="button" aria-label="Focus CheapShark API, api/1.0, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="api/1.0" data-node-context="Architecture component">
-          <title>CheapShark API · api/1.0 · Architecture component</title>
+        <g id="node-itad" data-node-id="itad" data-node-label="ITAD API" tabindex="0" role="button" aria-label="Focus ITAD API, api.isthereanydeal.com, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="api.isthereanydeal.com" data-node-context="Architecture component">
+          <title>ITAD API · api.isthereanydeal.com · Architecture component</title>
           <rect x="930" y="106" width="170" height="58" rx="6" class="c-mask"/>
           <rect x="930" y="106" width="170" height="58" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(936 112) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="1015" y="133" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CheapShark API</text>
-        <text data-detail="context" x="1015" y="149" class="t-muted" font-size="9" text-anchor="middle">api/1.0</text>
+          <text data-node-label="" data-detail-anchor="" x="1015" y="133" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">ITAD API</text>
+        <text data-detail="context" x="1015" y="149" class="t-muted" font-size="9" text-anchor="middle">api.isthereanydeal.com</text>
         </g>
 
         <g id="node-rawg" data-node-id="rawg" data-node-label="RAWG API" tabindex="0" role="button" aria-label="Focus RAWG API, api.rawg.io, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="api.rawg.io" data-node-context="Architecture component">
@@ -5266,11 +5266,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <rect x="348.6" y="133" width="62.8" height="14" rx="3" class="c-mask"/>
           <text x="380" y="143" class="t-backend" font-size="8" text-anchor="middle">HTTP / JSON</text>
         </g>
-        <g data-detail="context" data-edge-from="controllers" data-edge-to="cs_clients" data-edge-label="delega" data-edge-key="1">
+        <g data-detail="context" data-edge-from="controllers" data-edge-to="itad_provider" data-edge-label="delega" data-edge-key="1">
           <rect x="505.6" y="150.5" width="38.8" height="14" rx="3" class="c-mask"/>
           <text x="525" y="160.5" class="t-muted" font-size="8" text-anchor="middle">delega</text>
         </g>
-        <g data-detail="context" data-edge-from="controllers" data-edge-to="rawg_client" data-edge-label="delega" data-edge-key="2">
+        <g data-detail="context" data-edge-from="controllers" data-edge-to="rawg_provider" data-edge-label="delega" data-edge-key="2">
           <rect x="505.6" y="285.5" width="38.8" height="14" rx="3" class="c-mask"/>
           <text x="525" y="295.5" class="t-muted" font-size="8" text-anchor="middle">delega</text>
         </g>
@@ -5282,11 +5282,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <rect x="399" y="320" width="106" height="14" rx="3" class="c-mask"/>
           <text x="452" y="330" class="t-messagebus" font-size="8" text-anchor="middle">OpenAPI /v3/api-docs</text>
         </g>
-        <g data-detail="context" data-edge-from="cs_clients" data-edge-to="cheapshark" data-edge-label="GET /deals · /games · /stores" data-edge-key="5">
+        <g data-detail="context" data-edge-from="itad_provider" data-edge-to="itad" data-edge-label="POST /games/prices/v3" data-edge-key="5">
           <rect x="770.4" y="115" width="149.2" height="14" rx="3" class="c-mask"/>
-          <text x="845" y="125" class="t-muted" font-size="8" text-anchor="middle">GET /deals · /games · /stores</text>
+          <text x="845" y="125" class="t-muted" font-size="8" text-anchor="middle">POST /games/prices/v3</text>
         </g>
-        <g data-detail="context" data-edge-from="rawg_client" data-edge-to="rawg" data-edge-label="GET ?key=…" data-edge-key="6">
+        <g data-detail="context" data-edge-from="rawg_provider" data-edge-to="rawg" data-edge-label="GET ?key=…" data-edge-key="6">
           <rect x="816" y="371" width="58" height="14" rx="3" class="c-mask"/>
           <text x="845" y="381" class="t-muted" font-size="8" text-anchor="middle">GET ?key=…</text>
         </g>
@@ -5500,7 +5500,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <h3>Integraciones externas</h3>
         </div>
         <ul>
-          <li>&bull; CheapShark aporta deals, precios y tiendas</li>
+          <li>&bull; ITAD aporta catalogo, precios y ofertas</li>
           <li>&bull; RAWG aporta metadatos de juegos y DLC</li>
           <li>&bull; Un adaptador RestClient aislado por proveedor</li>
         </ul>

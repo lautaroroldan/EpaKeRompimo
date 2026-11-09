@@ -7,12 +7,12 @@
 
 A REST API backend that aggregates video game data from two external providers:
 
-- **[CheapShark](https://www.cheapshark.com/api)** — deals, prices and stores.
-- **[RAWG](https://rawg.io/apidocs)** — game metadata and DLC/additional content.
+- **[ITAD](https://isthereanydeal.com/)** — game catalog, store prices and deals.
+- **[RAWG](https://rawg.io/apidocs)** — game metadata and details.
 
-The project is designed to be the backend for a future frontend (web or mobile): it
-exposes clean JSON endpoints, centralizes error handling and is ready to grow with
-user accounts, favorites, search history and a recommendation engine.
+The project is designed to be the backend for a frontend (web or mobile): it exposes
+clean JSON endpoints, centralizes error handling and includes user accounts with
+stateless JWT authentication.
 
 ---
 
@@ -34,11 +34,11 @@ user accounts, favorites, search history and a recommendation engine.
 
 ## Features
 
-- Search deals across multiple stores through CheapShark.
-- Rich deal filtering (price range, Metacritic score, sale status, sorting, pagination, ...).
-- Search game metadata and DLCs through RAWG.
-- List the stores supported by CheapShark.
-- Centralized, consistent JSON error responses.
+- Search games by title through ITAD and get the price offered by each store.
+- List current deals with pagination.
+- Retrieve game details and metadata through RAWG.
+- User accounts with stateless JWT authentication.
+- Centralized, consistent JSON error responses (RFC 7807 `ProblemDetail`).
 - Request validation with clear `400 Bad Request` messages.
 - Interactive API documentation with Swagger UI.
 - External API keys kept out of the repository.
@@ -51,6 +51,8 @@ user accounts, favorites, search history and a recommendation engine.
 | Framework | Spring Boot 4.1.1 (Spring Framework 7) |
 | Web | Spring MVC (`spring-boot-starter-webmvc`) |
 | HTTP client | `RestClient` |
+| Security | Spring Security + JWT (`jjwt`) |
+| Persistence | Spring Data JPA (H2 by default, MySQL supported) |
 | Validation | Jakarta Bean Validation |
 | Boilerplate | Lombok |
 | API docs | springdoc-openapi (Swagger UI) |
@@ -60,195 +62,150 @@ user accounts, favorites, search history and a recommendation engine.
 ## Architecture
 
 ```
-                          HTTP / JSON
-   Client (future frontend) ──────────────┐
-                                          ▼
-                                 ┌──────────────────┐
-                                 │   Controllers    │  /api/deals, /api/games, /api/stores
-                                 └────────┬─────────┘
-                                          │
-                                 ┌────────▼─────────┐
-                                 │  Clients (Rest)  │  one adapter per provider
-                                 └───┬──────────┬───┘
-                                     │          │
-                         ┌───────────▼──┐   ┌───▼──────────┐
-                         │  CheapShark  │   │     RAWG     │
-                         │  public API  │   │   public API │
-                         └──────────────┘   └──────────────┘
-
-                 GlobalExceptionHandler maps upstream/validation
-                 errors into a single ErrorResponseDTO shape.
+                        HTTP / JSON
+   Client (frontend) ───────────────────┐
+                                        ▼
+                               ┌──────────────────┐
+                               │   Controllers    │  /api/games · /api/deals · /api/details · /api/users
+                               └────────┬─────────┘
+                                        │
+                               ┌────────▼─────────┐
+                               │ GameSearchService│  facade + orchestration
+                               └────────┬─────────┘
+                    ┌───────────────────┼───────────────────┐
+                    ▼                   ▼                   ▼
+          GameCatalogService   PriceAggregationService   GameDetailService
+                    │                   │                   │
+          GameCatalogProvider      PriceProvider        GameInfoProvider
+                    │                   │                   │
+                 ITAD API            ITAD API            RAWG API
 ```
 
 The codebase is organized **by layer, with a per-provider subpackage** for the
-external integrations (`client/cheapshark`, `client/rawg`, `dto/cheapshark`,
-`dto/rawg`). This keeps controllers provider-agnostic while the adapters stay
-isolated and swappable.
+external integrations (`provider/price`, `provider/gamecatalog`, `provider/info`).
+Each provider sits behind an interface (`PriceProvider`, `GameCatalogProvider`,
+`GameInfoProvider`), so the service layer stays provider-agnostic and new sources
+can be added without touching the controllers.
+
+> Adding a new price source is a matter of creating a `@Component` that implements
+> `PriceProvider`: Spring injects every implementation into
+> `PriceAggregationService` automatically.
 
 ## API reference
 
 Base path: `/api`. All responses are JSON.
 
-### Deals — CheapShark
+### Search games and prices — ITAD
 
-`GET /api/deals/`
+`GET /api/games`
 
 | Parameter | Type | Description |
 |---|---|---|
-| `title` | string | Filter by game title. |
-| `storeIDs` | string | Comma-separated store IDs. Defaults to the main stores. |
-| `exact` | integer | `1` to match the title exactly. Defaults to `1`. |
-| `pageNumber` | integer | Page number (0-based). |
-| `pageSize` | integer | Number of results per page. |
-| `sortBy` | enum | `DealRating`, `Title`, `Savings`, `Price`, `Metacritic`, `Reviews`, `ReviewCount`, `Release`, `Store`, `Recent`. |
-| `desc` | integer | `1` for descending order. |
-| `lowerPrice` | number | Minimum price. |
-| `upperPrice` | number | Maximum price. |
-| `metacritic` | integer | Minimum Metacritic score. |
-| `steamRating` | number | Minimum Steam rating. |
-| `minimumReviewCount` | integer | Minimum review count. |
-| `maxAge` | integer | Max age of the deal in minutes. |
-| `steamAppID` | string | Filter by Steam App ID. |
-| `AAA` | string | `1` to only include AAA titles. |
-| `steamworks` | string | `1` to only include Steamworks titles. |
-| `onSale` | integer | `1` to only include games currently on sale. |
+| `country` | string | Country code used to resolve prices (e.g. `AR`, `US`). |
+| `title` | string | Game title to search for. |
 
 **Example**
 
 ```
-GET /api/deals/?title=witcher&upperPrice=20&sortBy=DealRating&pageSize=5
+GET /api/games?country=AR&title=witcher
 ```
 
 ```json
 [
   {
-    "title": "The Witcher 3: Wild Hunt",
-    "salePrice": "7.99",
-    "normalPrice": "39.99",
-    "savings": "80.020",
-    "storeID": "1"
+    "game": {
+      "id": "018d937f-...",
+      "title": "The Witcher 3: Wild Hunt",
+      "description": "",
+      "type": "game",
+      "imageUrl": "https://...",
+      "releaseDate": "",
+      "tags": [""]
+    },
+    "prices": [
+      {
+        "salePrice": 7.99,
+        "normalPrice": 39.99,
+        "store": {
+          "name": "Steam",
+          "urlStore": "https://store.steampowered.com/...",
+          "urlLogo": ""
+        },
+        "providerName": "ITAD"
+      }
+    ]
   }
 ]
 ```
 
-### Games — CheapShark
+### Deals — ITAD
 
-`GET /api/games/?title={title}` — search games on CheapShark.
+`GET /api/deals`
 
-```json
-[
-  {
-    "gameID": "612",
-    "steamAppID": "292030",
-    "cheapest": "7.99",
-    "cheapestDealID": "abc123",
-    "external": "The Witcher 3: Wild Hunt",
-    "internalName": "THEWITCHER3WILDHUNT",
-    "thumb": "https://..."
-  }
-]
-```
+| Parameter | Type | Description |
+|---|---|---|
+| `country` | string | Country code used to resolve prices. |
+| `offset` | integer | Pagination offset. |
+| `limit` | integer | Maximum number of results. |
 
-### Games — RAWG (paginated)
-
-`GET /api/games/games?title={title}` — search games on RAWG.
-
-`GET /api/games/dlcs?game_pk={id}` — list DLCs / additional content for a game.
-
-Both return a pagination envelope:
-
-```json
-{
-  "count": 1234,
-  "next": "https://api.rawg.io/api/games?page=2...",
-  "previous": null,
-  "results": [
-    {
-      "id": 3498,
-      "slug": "grand-theft-auto-v",
-      "name": "Grand Theft Auto V",
-      "released": "2013-09-17",
-      "tba": false,
-      "background_image": "https://...",
-      "rating": 4.47,
-      "metacritic": 92,
-      "playtime": 74,
-      "updated": "2024-01-01T00:00:00"
-    }
-  ]
-}
-```
+Returns the same `GameWithPricesDTO` shape as `/api/games`.
 
 ### Game details — RAWG
 
-`GET /api/games/{id}` — full details for a single game, where `{id}` is the RAWG
-game id (the `id` field from a search result).
+`GET /api/details`
+
+| Parameter | Type | Description |
+|---|---|---|
+| `title` | string | Game title to look up. |
 
 ```json
 {
-  "id": 3498,
+  "rawgId": 3498,
   "slug": "grand-theft-auto-v",
-  "name": "Grand Theft Auto V",
-  "name_original": "Grand Theft Auto V",
+  "title": "Grand Theft Auto V",
   "description": "<p>...</p>",
-  "metacritic": 92,
   "released": "2013-09-17",
-  "tba": false,
-  "background_image": "https://...",
-  "rating": 4.47,
-  "playtime": 74,
-  "website": "https://www.rockstargames.com/V/",
-  "esrb_rating": { "id": 4, "slug": "mature", "name": "Mature" },
-  "platforms": [
-    {
-      "platform": { "id": 4, "slug": "pc", "name": "PC" },
-      "released_at": "2015-04-14",
-      "requirements": { "minimum": "...", "recommended": "..." }
-    }
-  ]
+  "coverImageUrl": "https://...",
+  "platforms": []
 }
 ```
 
-### Stores — CheapShark
+### Users
 
-`GET /api/stores/`
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/users` | List users. |
+| `GET` | `/api/users/{id}` | Get a user by id. |
+| `POST` | `/api/users` | Register a user. |
+| `PUT` | `/api/users/{id}` | Update a user. |
+| `DELETE` | `/api/users/{id}` | Delete a user. |
+| `POST` | `/api/users/login` | Authenticate and obtain a JWT. |
+| `GET` | `/api/users/exists/{username}` | Check whether a username is taken. |
 
-```json
-[
-  {
-    "storeID": "1",
-    "storeName": "Steam",
-    "isActive": 1,
-    "images": {
-      "banner": "https://...",
-      "logo": "https://...",
-      "icon": "https://..."
-    }
-  }
-]
-```
+`POST /api/users`, `POST /api/users/login` and `GET /api/users/exists/{username}`
+are public. Every other endpoint requires a `Bearer` token.
 
 ### Errors
 
-Every error uses the same shape:
+Errors follow RFC 7807 (`ProblemDetail`):
 
 ```json
 {
-  "timestamp": "2026-09-10T11:50:02.950Z",
+  "type": "about:blank",
+  "title": "Bad Request",
   "status": 400,
-  "error": "Validation failed",
-  "message": "One or more parameters are invalid",
-  "path": "/api/games/",
-  "details": {
-    "title": "must not be blank"
-  }
+  "detail": "title: must not be blank",
+  "instance": "/api/games"
 }
 ```
 
 | Status | Meaning |
 |---|---|
 | `400` | Validation error or invalid parameter. |
-| `502` | The upstream API (CheapShark/RAWG) failed or is unreachable. |
+| `401` | Invalid credentials or missing/invalid token. |
+| `403` | Operation not allowed for the authenticated user. |
+| `404` | Resource not found. |
+| `409` | Username already taken or data integrity conflict. |
 | `500` | Unexpected server error. |
 
 ### API documentation
@@ -264,6 +221,7 @@ Once the app is running:
 
 - JDK 21+
 - Maven is **not** required — use the included wrapper (`mvnw` / `mvnw.cmd`).
+- An ITAD API key: <https://isthereanydeal.com/>
 - A RAWG API key (free): <https://rawg.io/apidocs>
 
 ### 1. Clone
@@ -306,42 +264,54 @@ The API will be available at <http://localhost:8080>.
 
 | Variable | Description | Default |
 |---|---|---|
-| `RAWG_API_KEY` | API key for RAWG. **Required** for RAWG endpoints. | *(empty)* |
+| `ITAD_API_KEY` | API key for ITAD. **Required** for price and catalog endpoints. | *(empty)* |
+| `ITAD_CLIENT_ID` | ITAD client id used by the integration. | *(empty)* |
+| `ITAD_CLIENT_SECRET` | ITAD client secret. | *(empty)* |
+| `RAWG_API_KEY` | API key for RAWG. **Required** for the details endpoint. | *(empty)* |
+| `JWT_SECRET` | Base64 secret (>= 32 bytes) used to sign JWTs. | dev-only default |
+| `DB_URL` | JDBC URL. | `jdbc:h2:file:./data/epakerompimo;MODE=MySQL` |
+| `DB_USERNAME` | Database user. | `sa` |
+| `DB_PASSWORD` | Database password. | *(empty)* |
 
 Relevant `application.properties` keys:
 
 - `spring.http.client.connect-timeout` / `read-timeout` — timeouts for external calls.
+- `spring.jpa.hibernate.ddl-auto` — schema generation (`update` in development).
 
 ## Project structure
 
 ```
 backend/src/main/java/com/lautaroroldan/epakerompimo
 ├── EpaKeRompimoApplication.java
-├── config/                 # beans and clients wiring
-│   └── ApiClientConfig.java
+├── config/                 # beans, security and CORS wiring
+│   ├── ApiClientConfig.java
+│   ├── CorsConfig.java
+│   └── SecurityConfig.java
 ├── controller/             # HTTP endpoints
 │   ├── DealController.java
+│   ├── DetailController.java
 │   ├── GameController.java
-│   └── StoreController.java
-├── client/                 # external API adapters (RestClient)
-│   ├── cheapshark/
-│   │   ├── CheapSharkDealClient.java
-│   │   ├── CheapSharkGameClient.java
-│   │   └── CheapSharkStoreClient.java
-│   └── rawg/
-│       └── RAWGClient.java
+│   ├── StoreController.java
+│   └── UserController.java
+├── client/                 # shared RestClient helper
+│   └── AbstractApiClient.java
+├── provider/               # external API adapters, one package per concern
+│   ├── gamecatalog/        # GameCatalogProvider + ITAD DTOs
+│   ├── info/               # GameInfoProvider + RAWG adapter/DTOs
+│   └── price/              # PriceProvider + ITAD adapter/DTOs
+├── service/                # business logic
+│   ├── GameCatalogService.java
+│   ├── GameDetailService.java
+│   ├── GameSearchService.java
+│   ├── GameSearchServiceManager.java
+│   ├── PriceAggregationService.java
+│   ├── UserService.java
+│   └── UserServiceManager.java
 ├── dto/                    # request/response models
-│   ├── cheapshark/
-│   └── rawg/
-├── enums/                  # domain enums (stores, sorting)
-├── exception/              # error handling
-│   ├── ApiClientException.java
-│   ├── ErrorResponseDTO.java
-│   └── GlobalExceptionHandler.java
-├── model/        (roadmap) # JPA entities
-├── repository/   (roadmap) # Spring Data repositories
-├── service/      (roadmap) # business logic + recommendations
-└── security/     (roadmap) # JWT authentication
+├── entity/                 # JPA entities
+├── repository/             # Spring Data repositories
+├── security/               # JWT filter and helpers
+└── exceptions/             # error handling
 ```
 
 ## Testing
@@ -355,19 +325,15 @@ cd backend
 .\mvnw.cmd test
 ```
 
-Tests run as a Spring context smoke test and require no database.
-
 ## Roadmap
 
-- [ ] Add persistence (Spring Data JPA + MySQL + Flyway).
-- [ ] User accounts with credentials (JWT stateless authentication).
-- [ ] Favorites / wishlist persistence.
-- [ ] Search history.
-- [ ] Content-based recommendation engine (RAWG genres/tags + user favorites).
-- [ ] Deal caching to reduce calls to external APIs.
-- [ ] CORS configuration for the future frontend.
+- [ ] Add focused unit tests for the service layer.
+- [ ] Cache ITAD responses to reduce external calls.
+- [ ] Isolate provider failures so one unavailable source does not abort aggregation.
+- [ ] Add a console store provider (e.g. PlayStation Store / Xbox) as a new `PriceProvider`.
 - [ ] Docker Compose setup for MySQL.
-- [ ] More tests (client and controller layers).
+- [ ] Persist favorites / wishlist and search history.
+- [ ] Content-based recommendation engine (RAWG genres/tags + user favorites).
 
 ## License
 
