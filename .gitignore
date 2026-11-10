@@ -38,3 +38,6 @@ build/
 !.env.example
 application-local.properties
 application-local.yml
+
+### Local H2 database files ###
+data/

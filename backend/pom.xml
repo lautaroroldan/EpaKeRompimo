@@ -85,6 +85,13 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- H2 in its embedded/in-memory mode: lets the app run with no external database -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- Spring Data JPA -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
