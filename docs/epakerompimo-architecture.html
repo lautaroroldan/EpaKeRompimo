@@ -5161,11 +5161,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <!-- Connection paths (before components for correct z-order) -->
         <path data-edge-from="client" data-edge-to="controllers" data-edge-label="HTTP / JSON" data-edge-key="0" data-composition-points="380,98;380,176" d="M 380 98 L 380 176" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         <path data-edge-from="controllers" data-edge-to="itad_provider" data-edge-label="delega" data-edge-key="1" data-composition-points="490,206;525,206;525,135;560,135" d="M 490 206 L 517 206 Q 525 206 525 198 L 525 143 Q 525 135 533 135 L 560 135" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="controllers" data-edge-to="rawg_provider" data-edge-label="delega" data-edge-key="2" data-composition-points="490,220;525,220;525,391;560,391" d="M 490 220 L 517 220 Q 525 220 525 228 L 525 383 Q 525 391 533 391 L 560 391" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="controllers" data-edge-to="igdb_provider" data-edge-label="delega" data-edge-key="2" data-composition-points="490,220;525,220;525,391;560,391" d="M 490 220 L 517 220 Q 525 220 525 228 L 525 383 Q 525 391 533 391 L 560 391" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         <path data-edge-from="controllers" data-edge-to="exception" data-edge-label="errores de validación" data-edge-key="3" data-composition-points="380,250;380,317;175,317;175,384" d="M 380 250 L 380 309 Q 380 317 372 317 L 183 317 Q 175 317 175 325 L 175 384" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         <path data-edge-from="controllers" data-edge-to="swagger" data-edge-label="OpenAPI /v3/api-docs" data-edge-key="4" data-composition-points="380,250;380,335;410,335;410,420" d="M 380 250 L 380 327 Q 380 335 388 335 L 402 335 Q 410 335 410 343 L 410 420" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         <path data-edge-from="itad_provider" data-edge-to="itad" data-edge-label="POST /games/prices/v3" data-edge-key="5" data-composition-points="760,135;930,135" d="M 760 135 L 930 135" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="rawg_provider" data-edge-to="rawg" data-edge-label="GET ?key=…" data-edge-key="6" data-composition-points="760,391;930,391" d="M 760 391 L 930 391" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="igdb_provider" data-edge-to="igdb" data-edge-label="POST /games + Bearer" data-edge-key="6" data-composition-points="760,391;930,391" d="M 760 391 L 930 391" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
 
         <!-- Components -->
         <g id="node-client" data-node-id="client" data-node-label="Frontend (futuro)" tabindex="0" role="button" aria-label="Focus Frontend (futuro), web / móvil, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="web / móvil" data-node-context="Architecture component">
@@ -5226,14 +5226,14 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="context" x="660" y="149" class="t-muted" font-size="9" text-anchor="middle">PriceProvider / GameCatalogProvider</text>
         </g>
 
-        <g id="node-rawg_provider" data-node-id="rawg_provider" data-node-label="RAWGProvider" tabindex="0" role="button" aria-label="Focus RAWGProvider, search / detail, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="search / detail" data-node-context="Architecture component">
-          <title>RAWGProvider · search / detail · Architecture component</title>
+        <g id="node-igdb_provider" data-node-id="igdb_provider" data-node-label="IGDBProvider" tabindex="0" role="button" aria-label="Focus IGDBProvider, search / detail, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="search / detail" data-node-context="Architecture component">
+          <title>IGDBProvider · search / detail · Architecture component</title>
           <rect x="560" y="360" width="200" height="62" rx="6" class="c-mask"/>
           <rect x="560" y="360" width="200" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(566 366) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="660" y="389" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">RAWGProvider</text>
+          <text data-node-label="" data-detail-anchor="" x="660" y="389" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">IGDBProvider</text>
         <text data-detail="context" x="660" y="405" class="t-muted" font-size="9" text-anchor="middle">search / detail</text>
         </g>
 
@@ -5249,16 +5249,16 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="context" x="1015" y="149" class="t-muted" font-size="9" text-anchor="middle">api.isthereanydeal.com</text>
         </g>
 
-        <g id="node-rawg" data-node-id="rawg" data-node-label="RAWG API" tabindex="0" role="button" aria-label="Focus RAWG API, api.rawg.io, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="api.rawg.io" data-node-context="Architecture component">
-          <title>RAWG API · api.rawg.io · Architecture component</title>
+        <g id="node-igdb" data-node-id="igdb" data-node-label="IGDB API" tabindex="0" role="button" aria-label="Focus IGDB API, api.igdb.com/v4, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="api.igdb.com/v4" data-node-context="Architecture component">
+          <title>IGDB API · api.igdb.com/v4 · Architecture component</title>
           <rect x="930" y="362" width="170" height="58" rx="6" class="c-mask"/>
           <rect x="930" y="362" width="170" height="58" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(936 368) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="1015" y="389" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">RAWG API</text>
-        <text data-detail="context" x="1015" y="405" class="t-muted" font-size="9" text-anchor="middle">api.rawg.io</text>
+          <text data-node-label="" data-detail-anchor="" x="1015" y="389" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">IGDB API</text>
+        <text data-detail="context" x="1015" y="405" class="t-muted" font-size="9" text-anchor="middle">api.igdb.com/v4</text>
         </g>
 
         <!-- Connection labels -->
@@ -5270,7 +5270,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <rect x="505.6" y="150.5" width="38.8" height="14" rx="3" class="c-mask"/>
           <text x="525" y="160.5" class="t-muted" font-size="8" text-anchor="middle">delega</text>
         </g>
-        <g data-detail="context" data-edge-from="controllers" data-edge-to="rawg_provider" data-edge-label="delega" data-edge-key="2">
+        <g data-detail="context" data-edge-from="controllers" data-edge-to="igdb_provider" data-edge-label="delega" data-edge-key="2">
           <rect x="505.6" y="285.5" width="38.8" height="14" rx="3" class="c-mask"/>
           <text x="525" y="295.5" class="t-muted" font-size="8" text-anchor="middle">delega</text>
         </g>
@@ -5286,9 +5286,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <rect x="770.4" y="115" width="149.2" height="14" rx="3" class="c-mask"/>
           <text x="845" y="125" class="t-muted" font-size="8" text-anchor="middle">POST /games/prices/v3</text>
         </g>
-        <g data-detail="context" data-edge-from="rawg_provider" data-edge-to="rawg" data-edge-label="GET ?key=…" data-edge-key="6">
+        <g data-detail="context" data-edge-from="igdb_provider" data-edge-to="igdb" data-edge-label="POST /games + Bearer" data-edge-key="6">
           <rect x="816" y="371" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="845" y="381" class="t-muted" font-size="8" text-anchor="middle">GET ?key=…</text>
+          <text x="845" y="381" class="t-muted" font-size="8" text-anchor="middle">POST /games + Bearer</text>
         </g>
 
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
@@ -5501,7 +5501,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </div>
         <ul>
           <li>&bull; ITAD aporta catalogo, precios y ofertas</li>
-          <li>&bull; RAWG aporta metadatos de juegos y DLC</li>
+          <li>&bull; IGDB aporta metadatos de juegos y DLC</li>
           <li>&bull; Un adaptador RestClient aislado por proveedor</li>
         </ul>
       </div>
@@ -5514,7 +5514,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <ul>
           <li>&bull; GlobalExceptionHandler unifica toda respuesta de error</li>
           <li>&bull; 400 validación · 502 upstream · 500 inesperado</li>
-          <li>&bull; RAWG_API_KEY y timeouts 5s/10s desde application.properties</li>
+          <li>&bull; IGDB_CLIENT_ID/SECRET y timeouts 5s/10s desde application.properties</li>
         </ul>
       </div>
     </div>

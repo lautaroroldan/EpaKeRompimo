@@ -12,7 +12,7 @@
 	<artifactId>EpaKeRompimo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>EpaKeRompimo</name>
-	<description>REST API backend that aggregates video game prices from ITAD and metadata from RAWG.</description>
+	<description>REST API backend that aggregates video game prices from ITAD and metadata from IGDB.</description>
 	<url>https://github.com/lautaroroldan/EpaKeRompimo</url>
 	<licenses>
 		<license>

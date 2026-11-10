@@ -3,10 +3,7 @@ package com.lautaroroldan.epakerompimo.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClient;
-
-import java.util.Map;
 
 @Configuration
 public class ApiClientConfig {
@@ -19,14 +16,24 @@ public class ApiClientConfig {
                 .build();
     }
 
-    @Bean("RAWGClient")
-    public RestClient rawgClient(
+    /**
+     * IGDB requires a static {@code Client-ID} header plus a rotating
+     * {@code Authorization: Bearer ...} token, so the token is resolved on every
+     * request through the interceptor instead of a fixed default header.
+     */
+    @Bean("IGDBClient")
+    public RestClient igdbClient(
             RestClient.Builder builder,
-            @Value("${rawg.api.key}") String apiKey
+            IgdbTokenService tokenService,
+            @Value("${igdb.client.id}") String clientId
     ) {
-        return builder
-                .baseUrl("https://api.rawg.io/api")
-                .defaultUriVariables(Map.of("key", apiKey))
+        return builder.clone()
+                .baseUrl("https://api.igdb.com/v4")
+                .defaultHeader("Client-ID", clientId)
+                .requestInterceptor((request, body, execution) -> {
+                    request.getHeaders().setBearerAuth(tokenService.accessToken());
+                    return execution.execute(request, body);
+                })
                 .build();
     }
 }

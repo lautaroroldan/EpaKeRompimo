@@ -2,5 +2,5 @@ package com.lautaroroldan.epakerompimo.dto.game;
 
 import java.util.List;
 
-public record GameDetailDTO(int rawgId, String slug, String title, String description,
+public record GameDetailDTO(long externalId, String slug, String title, String description,
                              String released, String coverImageUrl, List<String> platforms) { }

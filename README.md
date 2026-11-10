@@ -8,7 +8,7 @@
 A REST API backend that aggregates video game data from two external providers:
 
 - **[ITAD](https://isthereanydeal.com/)** — game catalog, store prices and deals.
-- **[RAWG](https://rawg.io/apidocs)** — game metadata and details.
+- **[IGDB](https://api-docs.igdb.com)** — game metadata and details.
 
 The project is designed to be the backend for a frontend (web or mobile): it exposes
 clean JSON endpoints, centralizes error handling and includes user accounts with
@@ -36,7 +36,7 @@ stateless JWT authentication.
 
 - Search games by title through ITAD and get the price offered by each store.
 - List current deals with pagination.
-- Retrieve game details and metadata through RAWG.
+- Retrieve game details and metadata through IGDB.
 - User accounts with stateless JWT authentication.
 - Centralized, consistent JSON error responses (RFC 7807 `ProblemDetail`).
 - Request validation with clear `400 Bad Request` messages.
@@ -78,7 +78,7 @@ stateless JWT authentication.
                     │                   │                   │
           GameCatalogProvider      PriceProvider        GameInfoProvider
                     │                   │                   │
-                 ITAD API            ITAD API            RAWG API
+                 ITAD API            ITAD API            IGDB API
 ```
 
 The codebase is organized **by layer, with a per-provider subpackage** for the
@@ -150,7 +150,7 @@ GET /api/games?country=AR&title=witcher
 
 Returns the same `GameWithPricesDTO` shape as `/api/games`.
 
-### Game details — RAWG
+### Game details — IGDB
 
 `GET /api/details`
 
@@ -160,15 +160,19 @@ Returns the same `GameWithPricesDTO` shape as `/api/games`.
 
 ```json
 {
-  "rawgId": 3498,
+  "externalId": 1029,
   "slug": "grand-theft-auto-v",
   "title": "Grand Theft Auto V",
-  "description": "<p>...</p>",
+  "description": "Grand Theft Auto V is an open world action-adventure video game...",
   "released": "2013-09-17",
-  "coverImageUrl": "https://...",
-  "platforms": []
+  "coverImageUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big/....jpg",
+  "platforms": ["PC (Microsoft Windows)", "PlayStation 4"]
 }
 ```
+
+> `description` is IGDB's `summary` (falling back to `storyline`), so it is
+> noticeably shorter than a full store page description. IGDB returns plain
+> text, not HTML.
 
 ### Users
 
@@ -222,7 +226,9 @@ Once the app is running:
 - JDK 21+
 - Maven is **not** required — use the included wrapper (`mvnw` / `mvnw.cmd`).
 - An ITAD API key: <https://isthereanydeal.com/>
-- A RAWG API key (free): <https://rawg.io/apidocs>
+- IGDB credentials: create a Twitch developer app with Client Type
+  `Confidential` at <https://dev.twitch.tv/console/apps>, then take its Client ID
+  and Client Secret.
 
 ### 1. Clone
 
@@ -267,7 +273,8 @@ The API will be available at <http://localhost:8080>.
 | `ITAD_API_KEY` | API key for ITAD. **Required** for price and catalog endpoints. | *(empty)* |
 | `ITAD_CLIENT_ID` | ITAD client id used by the integration. | *(empty)* |
 | `ITAD_CLIENT_SECRET` | ITAD client secret. | *(empty)* |
-| `RAWG_API_KEY` | API key for RAWG. **Required** for the details endpoint. | *(empty)* |
+| `IGDB_CLIENT_ID` | Twitch application Client ID. **Required** for the details endpoint. | *(empty)* |
+| `IGDB_CLIENT_SECRET` | Twitch application Client Secret. **Required** for the details endpoint. | *(empty)* |
 | `JWT_SECRET` | Base64 secret (>= 32 bytes) used to sign JWTs. | dev-only default |
 | `DB_URL` | JDBC URL. | `jdbc:h2:file:./data/epakerompimo;MODE=MySQL` |
 | `DB_USERNAME` | Database user. | `sa` |
@@ -277,6 +284,11 @@ Relevant `application.properties` keys:
 
 - `spring.http.client.connect-timeout` / `read-timeout` — timeouts for external calls.
 - `spring.jpa.hibernate.ddl-auto` — schema generation (`update` in development).
+
+IGDB has no API key: the backend exchanges `IGDB_CLIENT_ID` +
+`IGDB_CLIENT_SECRET` for a Twitch OAuth2 token and caches it in memory until it
+is close to expiry, so no manual refresh is needed. Keep in mind IGDB allows
+**4 requests per second** per application.
 
 ## Project structure
 
@@ -297,7 +309,7 @@ backend/src/main/java/com/lautaroroldan/epakerompimo
 │   └── AbstractApiClient.java
 ├── provider/               # external API adapters, one package per concern
 │   ├── gamecatalog/        # GameCatalogProvider + ITAD DTOs
-│   ├── info/               # GameInfoProvider + RAWG adapter/DTOs
+│   ├── info/               # GameInfoProvider + IGDB adapter/DTOs
 │   └── price/              # PriceProvider + ITAD adapter/DTOs
 ├── service/                # business logic
 │   ├── GameCatalogService.java
@@ -333,7 +345,7 @@ cd backend
 - [ ] Add a console store provider (e.g. PlayStation Store / Xbox) as a new `PriceProvider`.
 - [ ] Docker Compose setup for MySQL.
 - [ ] Persist favorites / wishlist and search history.
-- [ ] Content-based recommendation engine (RAWG genres/tags + user favorites).
+- [ ] Content-based recommendation engine (IGDB genres/tags + user favorites).
 
 ## License
 

@@ -4,7 +4,7 @@ context: |
   Project: EpaKeRompimo REST API backend.
   Stack: Java 21, Spring Boot 4.1.1, Spring MVC, RestClient, Maven wrapper.
   Architecture: Layered controllers, service layer and provider-specific external API adapters.
-  Providers: ITAD for game catalog and prices, RAWG for game metadata.
+  Providers: ITAD for game catalog and prices, IGDB for game metadata.
   Conventions: package-by-layer with per-provider provider and DTO subpackages.
   Configuration: application.properties with optional .env import and environment secrets.
   Persistence: Hybrid OpenSpec files plus Engram project observations.
