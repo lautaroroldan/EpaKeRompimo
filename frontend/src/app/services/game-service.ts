@@ -11,6 +11,6 @@ export class GameService {
 
   searchGame(input: string, country: string) {
     const params = new HttpParams().set('title', input).set('country', country)
-    return this.http.get<GameWithPrices[]>(`${this.baseURL}/games/`, { params })
+    return this.http.get<GameWithPrices[]>(`${this.baseURL}/games`, { params })
   }
 }
