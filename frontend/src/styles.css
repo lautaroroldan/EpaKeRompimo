@@ -6,6 +6,61 @@
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
 /* You can add global styles to this file, and also import other style files */
 
+/*
+ * Brand palette. `static` forces Tailwind to emit every step as a CSS variable even when
+ * no utility uses it, because the semantic tokens below reference them with var().
+ * Without it, an unused step compiles to an empty var() and the color silently breaks.
+ */
+@theme static {
+  --color-ink-black-50: #eeeff6;
+  --color-ink-black-100: #dddfee;
+  --color-ink-black-200: #bcbedc;
+  --color-ink-black-300: #9a9ecb;
+  --color-ink-black-400: #787eba;
+  --color-ink-black-500: #575da8;
+  --color-ink-black-600: #454b87;
+  --color-ink-black-700: #343865;
+  --color-ink-black-800: #232543;
+  --color-ink-black-900: #111322;
+  --color-ink-black-950: #0c0d18;
+
+  --color-white-50: #f5f0f5;
+  --color-white-100: #ebe0eb;
+  --color-white-200: #d6c2d6;
+  --color-white-300: #c2a3c2;
+  --color-white-400: #ad85ad;
+  --color-white-500: #996699;
+  --color-white-600: #7a527a;
+  --color-white-700: #5c3d5c;
+  --color-white-800: #3d293d;
+  --color-white-900: #1f141f;
+  --color-white-950: #150e15;
+
+  --color-soft-periwinkle-50: #eee6fe;
+  --color-soft-periwinkle-100: #ddcdfe;
+  --color-soft-periwinkle-200: #ba9cfc;
+  --color-soft-periwinkle-300: #986afb;
+  --color-soft-periwinkle-400: #7538fa;
+  --color-soft-periwinkle-500: #5306f9;
+  --color-soft-periwinkle-600: #4205c7;
+  --color-soft-periwinkle-700: #320495;
+  --color-soft-periwinkle-800: #210363;
+  --color-soft-periwinkle-900: #110132;
+  --color-soft-periwinkle-950: #0c0123;
+
+  --color-indigo-ink-50: #efebfa;
+  --color-indigo-ink-100: #e0d6f5;
+  --color-indigo-ink-200: #c1adeb;
+  --color-indigo-ink-300: #a285e0;
+  --color-indigo-ink-400: #835cd6;
+  --color-indigo-ink-500: #6333cc;
+  --color-indigo-ink-600: #5029a3;
+  --color-indigo-ink-700: #3c1f7a;
+  --color-indigo-ink-800: #281452;
+  --color-indigo-ink-900: #140a29;
+  --color-indigo-ink-950: #0e071d;
+}
+
 :root {
   color-scheme: light;
 
@@ -18,7 +73,7 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -50,37 +105,38 @@
 :root.dark {
   color-scheme: dark;
 
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --chart-1: var(--color-soft-periwinkle-400);
+  --chart-2: var(--color-soft-periwinkle-300);
+  --chart-3: var(--color-indigo-ink-500);
+  --chart-4: var(--color-white-400);
+  --chart-5: var(--color-ink-black-400);
+
+  --background: var(--color-ink-black-950);
+  --foreground: var(--color-ink-black-50);
+  --card: var(--color-ink-black-900);
+  --card-foreground: var(--color-ink-black-50);
+  --popover: var(--color-ink-black-900);
+  --popover-foreground: var(--color-ink-black-50);
+  --primary: var(--color-soft-periwinkle-500);
+  --primary-foreground: var(--color-ink-black-50);
+  --secondary: var(--color-indigo-ink-900);
+  --secondary-foreground: var(--color-soft-periwinkle-100);
+  --muted: var(--color-ink-black-800);
+  --muted-foreground: var(--color-ink-black-300);
+  --accent: var(--color-indigo-ink-900);
+  --accent-foreground: var(--color-soft-periwinkle-100);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.985 0 0);
-  --sidebar-primary-foreground: oklch(0.205 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: var(--color-ink-black-800);
+  --input: var(--color-ink-black-700);
+  --ring: var(--color-soft-periwinkle-400);
+  --sidebar: var(--color-ink-black-900);
+  --sidebar-foreground: var(--color-ink-black-50);
+  --sidebar-primary: var(--color-soft-periwinkle-500);
+  --sidebar-primary-foreground: var(--color-ink-black-50);
+  --sidebar-accent: var(--color-indigo-ink-900);
+  --sidebar-accent-foreground: var(--color-soft-periwinkle-100);
+  --sidebar-border: var(--color-ink-black-800);
+  --sidebar-ring: var(--color-soft-periwinkle-400);
 }
 
 @layer base {

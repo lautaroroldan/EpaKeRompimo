@@ -6,6 +6,12 @@ export const serverRoutes: ServerRoute[] = [
     path: 'cuenta',
     renderMode: RenderMode.Client
   },
+  // El perfil de juego depende de un parámetro dinámico y de datos del backend:
+  // se renderiza en el servidor por request, no se puede pre-renderizar.
+  {
+    path: 'game/:title',
+    renderMode: RenderMode.Server
+  },
   {
     path: '**',
     renderMode: RenderMode.Prerender
