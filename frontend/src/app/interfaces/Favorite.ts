@@ -4,12 +4,12 @@ import { Game, GamePrice } from './Game';
 export interface FavoriteGame {
   id: number;
   itadGameId: string;
-  rawgGameId: number | null;
   game: Game | null;
   prices: GamePrice[];
 }
 
 export interface FavoriteEnterprise {
   id: number;
-  rawgEnterpriseId: number;
+  itadEnterpriseId: number;
+  name: string;
 }

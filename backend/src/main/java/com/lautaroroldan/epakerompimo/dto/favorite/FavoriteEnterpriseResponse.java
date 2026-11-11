@@ -1,3 +1,3 @@
 package com.lautaroroldan.epakerompimo.dto.favorite;
 
-public record FavoriteEnterpriseResponse(Long id, Long rawgEnterpriseId) {}
+public record FavoriteEnterpriseResponse(Long id, Long itadEnterpriseId, String name) {}

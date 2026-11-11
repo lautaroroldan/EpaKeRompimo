@@ -9,10 +9,10 @@ public interface FavoriteEnterpriseRepository extends JpaRepository<FavoriteEnte
 
     List<FavoriteEnterprise> findByUser_IdUserOrderByIdDesc(Long idUser);
 
-    boolean existsByUser_IdUserAndRawgEnterpriseId(Long idUser, Long rawgEnterpriseId);
+    boolean existsByUser_IdUserAndItadEnterpriseId(Long idUser, Long itadEnterpriseId);
 
     // Devuelve cuántos borró: 0 significa que esa empresa favorita no existía
-    long deleteByUser_IdUserAndRawgEnterpriseId(Long idUser, Long rawgEnterpriseId);
+    long deleteByUser_IdUserAndItadEnterpriseId(Long idUser, Long itadEnterpriseId);
 
     // Se usa al eliminar una cuenta
     void deleteByUser_IdUser(Long idUser);

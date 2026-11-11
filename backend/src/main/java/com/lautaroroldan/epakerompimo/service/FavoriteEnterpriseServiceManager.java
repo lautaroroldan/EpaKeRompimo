@@ -36,7 +36,7 @@ public class FavoriteEnterpriseServiceManager implements FavoriteEnterpriseServi
     @Override
     @Transactional
     public FavoriteEnterpriseResponse add(Long idUser, FavoriteEnterpriseRequest request) {
-        if (favoriteEnterpriseRepository.existsByUser_IdUserAndRawgEnterpriseId(idUser, request.rawgEnterpriseId())) {
+        if (favoriteEnterpriseRepository.existsByUser_IdUserAndItadEnterpriseId(idUser, request.itadEnterpriseId())) {
             throw new FavoriteAlreadyExistsException("Esa empresa ya está en tus favoritos");
         }
 
@@ -45,21 +45,22 @@ public class FavoriteEnterpriseServiceManager implements FavoriteEnterpriseServi
 
         FavoriteEnterprise favorite = new FavoriteEnterprise();
         favorite.setUser(user);
-        favorite.setRawgEnterpriseId(request.rawgEnterpriseId());
+        favorite.setItadEnterpriseId(request.itadEnterpriseId());
+        favorite.setName(request.name().trim());
 
         return toResponse(favoriteEnterpriseRepository.save(favorite));
     }
 
     @Override
     @Transactional
-    public void remove(Long idUser, Long rawgEnterpriseId) {
-        long deleted = favoriteEnterpriseRepository.deleteByUser_IdUserAndRawgEnterpriseId(idUser, rawgEnterpriseId);
+    public void remove(Long idUser, Long itadEnterpriseId) {
+        long deleted = favoriteEnterpriseRepository.deleteByUser_IdUserAndItadEnterpriseId(idUser, itadEnterpriseId);
         if (deleted == 0) {
             throw new FavoriteNotFoundException("Esa empresa no está en tus favoritos");
         }
     }
 
     private FavoriteEnterpriseResponse toResponse(FavoriteEnterprise favorite) {
-        return new FavoriteEnterpriseResponse(favorite.getId(), favorite.getRawgEnterpriseId());
+        return new FavoriteEnterpriseResponse(favorite.getId(), favorite.getItadEnterpriseId(), favorite.getName());
     }
 }

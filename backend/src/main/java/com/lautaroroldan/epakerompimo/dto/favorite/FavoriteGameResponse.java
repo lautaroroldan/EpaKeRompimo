@@ -10,7 +10,6 @@ import java.util.List;
 public record FavoriteGameResponse(
         Long id,
         String itadGameId,
-        Long rawgGameId,
         GameDTO game,
         List<PriceDTO> prices
 ) {}

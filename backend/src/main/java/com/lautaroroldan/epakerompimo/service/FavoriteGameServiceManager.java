@@ -1,7 +1,9 @@
 package com.lautaroroldan.epakerompimo.service;
 
+import com.lautaroroldan.epakerompimo.client.ITADCompanyClient;
 import com.lautaroroldan.epakerompimo.dto.GameDTO;
 import com.lautaroroldan.epakerompimo.dto.PriceDTO;
+import com.lautaroroldan.epakerompimo.dto.enterprise.EnterpriseResponse;
 import com.lautaroroldan.epakerompimo.dto.favorite.FavoriteGameRequest;
 import com.lautaroroldan.epakerompimo.dto.favorite.FavoriteGameResponse;
 import com.lautaroroldan.epakerompimo.entity.FavoriteGame;
@@ -10,6 +12,7 @@ import com.lautaroroldan.epakerompimo.exceptions.FavoriteAlreadyExistsException;
 import com.lautaroroldan.epakerompimo.exceptions.FavoriteNotFoundException;
 import com.lautaroroldan.epakerompimo.exceptions.UserNotFoundException;
 import com.lautaroroldan.epakerompimo.provider.info.GameInfoProvider;
+import com.lautaroroldan.epakerompimo.provider.info.ITADCompany;
 import com.lautaroroldan.epakerompimo.provider.price.PriceProvider;
 import com.lautaroroldan.epakerompimo.repository.FavoriteGameRepository;
 import com.lautaroroldan.epakerompimo.repository.UserRepository;
@@ -18,10 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-// Sin @Transactional a nivel clase a propósito: findAll llama a APIs externas
+// Sin @Transactional a nivel clase a propósito: findAll y findEnterprises llaman a ITAD
 // y no conviene tener una conexión a la base abierta mientras se espera esa respuesta.
 @Service
 public class FavoriteGameServiceManager implements FavoriteGameService {
@@ -30,15 +34,18 @@ public class FavoriteGameServiceManager implements FavoriteGameService {
     private final UserRepository userRepository;
     private final List<PriceProvider> priceProviders;
     private final List<GameInfoProvider> gameInfoProviders;
+    private final ITADCompanyClient itadCompanyClient;
 
     public FavoriteGameServiceManager(FavoriteGameRepository favoriteGameRepository,
                                       UserRepository userRepository,
                                       List<PriceProvider> priceProviders,
-                                      List<GameInfoProvider> gameInfoProviders) {
+                                      List<GameInfoProvider> gameInfoProviders,
+                                      ITADCompanyClient itadCompanyClient) {
         this.favoriteGameRepository = favoriteGameRepository;
         this.userRepository = userRepository;
         this.priceProviders = priceProviders;
         this.gameInfoProviders = gameInfoProviders;
+        this.itadCompanyClient = itadCompanyClient;
     }
 
     @Override
@@ -64,7 +71,6 @@ public class FavoriteGameServiceManager implements FavoriteGameService {
                 .map(f -> new FavoriteGameResponse(
                         f.getId(),
                         f.getItadGameId(),
-                        f.getRawgGameId(),
                         findGame(f.getItadGameId()),
                         pricesByGameId.getOrDefault(f.getItadGameId(), List.of())))
                 .toList();
@@ -90,10 +96,9 @@ public class FavoriteGameServiceManager implements FavoriteGameService {
         FavoriteGame favorite = new FavoriteGame();
         favorite.setUser(user);
         favorite.setItadGameId(request.itadGameId());
-        favorite.setRawgGameId(request.rawgGameId());
 
         FavoriteGame saved = favoriteGameRepository.save(favorite);
-        return new FavoriteGameResponse(saved.getId(), saved.getItadGameId(), saved.getRawgGameId(), null, List.of());
+        return new FavoriteGameResponse(saved.getId(), saved.getItadGameId(), null, List.of());
     }
 
     @Override
@@ -103,6 +108,23 @@ public class FavoriteGameServiceManager implements FavoriteGameService {
         if (deleted == 0) {
             throw new FavoriteNotFoundException("Ese juego no está en tus favoritos");
         }
+    }
+
+    // Empresas desarrolladoras de un juego favorito, según ITAD
+    @Override
+    public List<EnterpriseResponse> findEnterprises(Long idUser, String itadGameId) {
+        if (!favoriteGameRepository.existsByUser_IdUserAndItadGameId(idUser, itadGameId)) {
+            throw new FavoriteNotFoundException("Ese juego no está en tus favoritos");
+        }
+
+        // Sin repetidos: si ITAD lista dos veces la misma empresa, se queda con una
+        Map<Long, EnterpriseResponse> byId = new LinkedHashMap<>();
+        for (ITADCompany company : itadCompanyClient.findDevelopersByGameId(itadGameId)) {
+            if (company.id() != null && company.name() != null && !company.name().isBlank()) {
+                byId.putIfAbsent(company.id(), new EnterpriseResponse(company.id(), company.name().trim()));
+            }
+        }
+        return List.copyOf(byId.values());
     }
 
     // Busca los datos del juego (título, imagen) en el primer proveedor que lo conozca

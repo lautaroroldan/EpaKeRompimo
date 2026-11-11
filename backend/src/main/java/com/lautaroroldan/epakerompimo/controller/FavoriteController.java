@@ -1,5 +1,6 @@
 package com.lautaroroldan.epakerompimo.controller;
 
+import com.lautaroroldan.epakerompimo.dto.enterprise.EnterpriseResponse;
 import com.lautaroroldan.epakerompimo.dto.favorite.FavoriteEnterpriseRequest;
 import com.lautaroroldan.epakerompimo.dto.favorite.FavoriteEnterpriseResponse;
 import com.lautaroroldan.epakerompimo.dto.favorite.FavoriteGameRequest;
@@ -44,6 +45,13 @@ public class FavoriteController {
         return favoriteGameService.findItadGameIds(AuthUtils.userId(authentication));
     }
 
+    // Empresas desarrolladoras de un juego favorito (según ITAD), para marcarlas como favoritas
+    @GetMapping("/games/{itadGameId}/enterprises")
+    public List<EnterpriseResponse> findGameEnterprises(@PathVariable String itadGameId,
+                                                        Authentication authentication) {
+        return favoriteGameService.findEnterprises(AuthUtils.userId(authentication), itadGameId);
+    }
+
     @PostMapping("/games")
     public ResponseEntity<FavoriteGameResponse> addGame(@Valid @RequestBody FavoriteGameRequest request,
                                                         Authentication authentication) {
@@ -71,13 +79,13 @@ public class FavoriteController {
                                                                     Authentication authentication) {
         FavoriteEnterpriseResponse creado = favoriteEnterpriseService.add(AuthUtils.userId(authentication), request);
         return ResponseEntity
-                .created(URI.create("/api/favorites/enterprises/" + creado.rawgEnterpriseId()))
+                .created(URI.create("/api/favorites/enterprises/" + creado.itadEnterpriseId()))
                 .body(creado);
     }
 
-    @DeleteMapping("/enterprises/{rawgEnterpriseId}")
+    @DeleteMapping("/enterprises/{itadEnterpriseId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeEnterprise(@PathVariable Long rawgEnterpriseId, Authentication authentication) {
-        favoriteEnterpriseService.remove(AuthUtils.userId(authentication), rawgEnterpriseId);
+    public void removeEnterprise(@PathVariable Long itadEnterpriseId, Authentication authentication) {
+        favoriteEnterpriseService.remove(AuthUtils.userId(authentication), itadEnterpriseId);
     }
 }

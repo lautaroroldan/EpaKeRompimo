@@ -132,6 +132,19 @@ export class FavoriteService {
 
   // ---------- Empresas ----------
 
+  // Se lee dentro de un template: al ser un signal, la vista se actualiza sola
+  isFavoriteEnterprise(itadEnterpriseId: number): boolean {
+    return this._enterprises().some((e) => e.itadEnterpriseId === itadEnterpriseId);
+  }
+
+  toggleEnterprise(itadEnterpriseId: number, name: string) {
+    if (this.isFavoriteEnterprise(itadEnterpriseId)) {
+      this.removeEnterprise(itadEnterpriseId);
+    } else {
+      this.addEnterprise(itadEnterpriseId, name);
+    }
+  }
+
   // GET /api/favorites/enterprises
   loadEnterprises() {
     this.http.get<FavoriteEnterprise[]>(`${this.api}/enterprises`).subscribe({
@@ -142,35 +155,42 @@ export class FavoriteService {
   }
 
   // POST /api/favorites/enterprises
-  addEnterprise(rawgEnterpriseId: number) {
+  addEnterprise(itadEnterpriseId: number, name: string) {
     this._saving.set(true);
     this._error.set(null);
 
-    this.http.post<FavoriteEnterprise>(`${this.api}/enterprises`, { rawgEnterpriseId }).subscribe({
-      next: (created) => {
-        this._enterprises.update((list) => [created, ...list]);
-        this._saving.set(false);
-      },
-      error: (err) => {
-        this._error.set(errorMessage(err, 'No se pudo guardar la empresa en favoritos.'));
-        this._saving.set(false);
-      },
-    });
+    this.http
+      .post<FavoriteEnterprise>(`${this.api}/enterprises`, { itadEnterpriseId, name })
+      .subscribe({
+        next: (created) => {
+          this._enterprises.update((list) => [created, ...list]);
+          this._saving.set(false);
+        },
+        error: (err) => {
+          // 409: ya estaba guardada, se recarga la lista para que la estrella quede marcada
+          if (err instanceof HttpErrorResponse && err.status === 409) {
+            this.loadEnterprises();
+          } else {
+            this._error.set(errorMessage(err, 'No se pudo guardar la empresa en favoritos.'));
+          }
+          this._saving.set(false);
+        },
+      });
   }
 
-  // DELETE /api/favorites/enterprises/{rawgEnterpriseId}
-  removeEnterprise(rawgEnterpriseId: number) {
+  // DELETE /api/favorites/enterprises/{itadEnterpriseId}
+  removeEnterprise(itadEnterpriseId: number) {
     this._saving.set(true);
     this._error.set(null);
 
-    this.http.delete<void>(`${this.api}/enterprises/${rawgEnterpriseId}`).subscribe({
+    this.http.delete<void>(`${this.api}/enterprises/${itadEnterpriseId}`).subscribe({
       next: () => {
-        this.dropEnterprise(rawgEnterpriseId);
+        this.dropEnterprise(itadEnterpriseId);
         this._saving.set(false);
       },
       error: (err) => {
         if (err instanceof HttpErrorResponse && err.status === 404) {
-          this.dropEnterprise(rawgEnterpriseId);
+          this.dropEnterprise(itadEnterpriseId);
         } else {
           this._error.set(errorMessage(err, 'No se pudo quitar la empresa de favoritos.'));
         }
@@ -194,8 +214,8 @@ export class FavoriteService {
     this._games.update((list) => list.filter((g) => g.itadGameId !== itadGameId));
   }
 
-  private dropEnterprise(rawgEnterpriseId: number) {
-    this._enterprises.update((list) => list.filter((e) => e.rawgEnterpriseId !== rawgEnterpriseId));
+  private dropEnterprise(itadEnterpriseId: number) {
+    this._enterprises.update((list) => list.filter((e) => e.itadEnterpriseId !== itadEnterpriseId));
   }
 
   private reset() {

@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// Un juego favorito de un usuario. No se guarda el juego completo: solo sus ids externos.
-// Un mismo usuario no puede tener el mismo juego de ITAD dos veces.
+// Un juego favorito de un usuario. No se guarda el juego completo: solo su id de ITAD.
+// Un mismo usuario no puede tener el mismo juego dos veces.
 @Entity
 @Table(
         name = "favorite_games",
@@ -30,8 +30,4 @@ public class FavoriteGame {
     // Id del juego en IsThereAnyDeal (UUID). No es una clave foránea de MySQL.
     @Column(name = "itad_game_id", nullable = false, length = 64)
     private String itadGameId;
-
-    // Id del juego en RAWG. Es opcional: puede no haber coincidencia o no estar integrado todavía.
-    @Column(name = "rawg_game_id")
-    private Long rawgGameId;
 }

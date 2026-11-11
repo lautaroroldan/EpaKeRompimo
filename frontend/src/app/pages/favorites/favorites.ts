@@ -1,22 +1,25 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { HlmInputImports } from '@spartan-ng/helm/input';
+import { Enterprise } from '../../interfaces/Enterprise';
 import { GamePrice } from '../../interfaces/Game';
+import { EnterpriseService } from '../../services/enterprise-service';
 import { FavoriteService } from '../../services/favorite-service';
 
 @Component({
   selector: 'app-favorites',
-  imports: [DecimalPipe, HlmInputImports],
+  imports: [DecimalPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './favorites.html',
 })
 export class Favorites {
   protected readonly favorites = inject(FavoriteService); // el template lee games(), enterprises()...
+  protected readonly enterprises = inject(EnterpriseService); // el template lee enterprisesOf(), gameError()...
 
   protected readonly noImage =
     'https://static.vecteezy.com/system/resources/thumbnails/022/059/000/small_2x/no-image-available-icon-vector.jpg';
 
-  protected readonly enterpriseError = signal<string | null>(null);
+  // Juego favorito que tiene abierto el panel de empresas (uno a la vez)
+  protected readonly expandedGame = signal<string | null>(null);
 
   constructor() {
     this.favorites.clearError();
@@ -30,15 +33,17 @@ export class Favorites {
     return prices.reduce((min, p) => (p.salePrice < min.salePrice ? p : min));
   }
 
-  // TEMPORAL: las empresas vienen de RAWG y todavía no se pueden buscar por nombre,
-  // así que por ahora se agregan por su ID. Se reemplaza cuando esté la integración con RAWG.
-  protected addEnterprise(raw: string) {
-    const id = Number(raw);
-    if (!Number.isInteger(id) || id <= 0) {
-      this.enterpriseError.set('Ingresá un ID numérico válido.');
+  // Abre o cierra el panel con las empresas del juego (las pide a ITAD al abrir)
+  protected toggleCompanies(itadGameId: string) {
+    if (this.expandedGame() === itadGameId) {
+      this.expandedGame.set(null);
       return;
     }
-    this.enterpriseError.set(null);
-    this.favorites.addEnterprise(id);
+    this.expandedGame.set(itadGameId);
+    this.enterprises.loadForGame(itadGameId);
+  }
+
+  protected toggleEnterprise(enterprise: Enterprise) {
+    this.favorites.toggleEnterprise(enterprise.itadEnterpriseId, enterprise.name);
   }
 }
