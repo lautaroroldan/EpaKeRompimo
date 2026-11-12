@@ -1,0 +1,5 @@
+$kind: collection
+name: EpaKeRompimo
+variables:
+  - key: jwt_token
+    value: ''

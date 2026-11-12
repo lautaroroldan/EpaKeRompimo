@@ -1,0 +1,21 @@
+$kind: http-request
+name: Login
+method: POST
+url: 'localhost:8080/api/users/login'
+order: 1000
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      var jsonData = pm.response.json();
+      pm.collectionVariables.set("jwt_token", jsonData.token);
+      console.log("JWT token saved:", jsonData.token ? "✓" : "✗ token not found in response");

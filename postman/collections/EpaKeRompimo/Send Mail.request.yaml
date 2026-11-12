@@ -1,0 +1,20 @@
+$kind: http-request
+name: Send Mail
+method: POST
+url: 'localhost:8080/send-mail'
+order: 2000
+headers:
+  Content-Type: application/json
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{jwt_token}}'
+body:
+  type: json
+  content: |-
+    {
+      "destinatario": "kean.0714@gmail.com",
+      "asunto": "Aver",
+      "msg": "aver aver aver"
+    }

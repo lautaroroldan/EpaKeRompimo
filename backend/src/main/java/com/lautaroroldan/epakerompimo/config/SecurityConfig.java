@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/games/**", "/api/deals/**", "/api/stores/**").permitAll()
                         // Swagger / OpenAPI
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/send-mail").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())  
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
