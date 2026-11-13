@@ -11,4 +11,6 @@ public interface GameSearchService {
     List<GameWithPricesDTO> findPriceByGameTitle(String title, String country);
     GameDetailDTO findGameDetailByTitle(String title);
     List<PriceDTO> findOffersByTitle(String title, String country);
+    // Id de ITAD del juego que mejor coincide con el título (null si no hay)
+    String findItadGameIdByTitle(String title);
 }

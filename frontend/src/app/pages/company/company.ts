@@ -5,10 +5,11 @@ import { catchError, forkJoin, of, switchMap, tap } from 'rxjs';
 import { API_URL } from '../../config/api';
 import { CompanyDetail, CompanyGame, CompanyGames } from '../../interfaces/Company';
 import { GameCard } from '../../components/game-card/game-card';
+import { FavoriteEnterpriseButton } from '../../components/favorite-enterprise-button/favorite-enterprise-button';
 
 @Component({
   selector: 'app-company-profile',
-  imports: [GameCard],
+  imports: [GameCard, FavoriteEnterpriseButton],
   templateUrl: './company.html',
   styleUrl: './company.css',
 })

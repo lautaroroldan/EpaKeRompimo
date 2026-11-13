@@ -74,6 +74,16 @@ public class GameSearchServiceManager implements GameSearchService{
                 .toList();
     }
 
+    /**
+     * Mismo criterio que {@link #findOffersByTitle}: así la estrella de favoritos del perfil
+     * guarda el mismo juego cuyos precios se están mostrando. No consulta precios.
+     */
+    @Override
+    public String findItadGameIdByTitle(String title) {
+        GameDTO game = preferExactTitle(gameCatalogService.searchByTitle(title), title);
+        return game != null ? game.id() : null;
+    }
+
     private static GameDTO preferExactTitle(List<GameDTO> candidates, String title) {
         GameDTO exact = candidates.stream()
                 .filter(candidate -> TitleNormalizer.sameTitle(candidate.title(), title))
