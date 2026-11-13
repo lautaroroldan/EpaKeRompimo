@@ -56,14 +56,19 @@ public class ITADProvider extends AbstractApiClient implements PriceProvider, Ga
     }
 
     @Override
-    public List<GameWithPricesDTO> findDeals(String country, Integer offset, Integer limit) {
+    public List<GameWithPricesDTO> findDeals(String country, Integer offset, Integer limit, String sort) {
         return ApiConnect(() -> {
             ITADDealResponse response = client.get()
-                    .uri(uri -> uri.path("/deals/v2")
-                            .queryParam("country", country)
-                            .queryParam("offset", offset)
-                            .queryParam("limit", limit)
-                            .build())
+                    .uri(uri -> {
+                        uri.path("/deals/v2")
+                                .queryParam("country", country)
+                                .queryParam("offset", offset)
+                                .queryParam("limit", limit);
+                        if (sort != null && !sort.isBlank()) {
+                            uri.queryParam("sort", sort);
+                        }
+                        return uri.build();
+                    })
                     .retrieve()
                     .body(ITADDealResponse.class);
 

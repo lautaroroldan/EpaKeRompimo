@@ -24,7 +24,8 @@ public class DealController {
     @GetMapping("")
     public List<GameWithPricesDTO> findDeals(@RequestParam @NotBlank String country,
                                              @RequestParam Integer offset,
-                                             @RequestParam Integer limit) {
-        return gameSearchService.findDeals(country, offset, limit);
+                                             @RequestParam Integer limit,
+                                             @RequestParam(required = false) String sort) {
+        return gameSearchService.findDeals(country, offset, limit, sort);
     }
 }

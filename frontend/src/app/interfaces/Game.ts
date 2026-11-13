@@ -1,5 +1,5 @@
 export interface Game {
-    id: number,
+    id: string,
     title: string,
     description: string,
     type: string,
@@ -14,8 +14,14 @@ export interface GameWithPrices {
 }
 
 export interface GamePrice {
-    salePrice: number,
-    normalPrice: number,
-    store: any,
-    providerName: string
+    salePrice: number | null,
+    normalPrice: number | null,
+    store: {
+        name: string,
+        urlStore: string,
+        urlLogo: string
+    },
+    providerName: string,
+    discountPercent: number | null,
+    currency: string | null
 }

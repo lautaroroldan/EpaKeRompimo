@@ -11,5 +11,5 @@ public interface PriceProvider {
     List<PriceDTO> findPrice(String titulo);
     Map<String, List<PriceDTO>> findPriceById(String [] gameIds, String country);
     String getName();
-    List<GameWithPricesDTO> findDeals(String country, Integer offset, Integer limit);
+    List<GameWithPricesDTO> findDeals(String country, Integer offset, Integer limit, String sort);
 }

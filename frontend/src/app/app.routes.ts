@@ -5,7 +5,7 @@ import { GameProfile } from './pages/game-profile/game-profile';
 import { CompanyProfile } from './pages/company/company';
 
 export const routes: Routes = [
-  { path: '', component: Home },
+  { path: '', component: Home, title: 'EpaKeRompimo | Compará precios de juegos' },
   { path: 'game/:title', component: GameProfile },
   { path: 'company/:id', component: CompanyProfile },
   {

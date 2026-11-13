@@ -28,8 +28,8 @@ public class GameSearchServiceManager implements GameSearchService{
     }
 
     @Override
-    public List<GameWithPricesDTO> findDeals(String country, Integer offset, Integer limit) {
-        return priceAggregationService.findDeals(country, offset, limit);
+    public List<GameWithPricesDTO> findDeals(String country, Integer offset, Integer limit, String sort) {
+        return priceAggregationService.findDeals(country, offset, limit, sort);
     }
 
     @Override

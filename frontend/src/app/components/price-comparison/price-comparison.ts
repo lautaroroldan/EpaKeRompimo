@@ -4,6 +4,7 @@ import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, switchMap } from 'rxjs';
 import { API_URL } from '../../config/api';
 import { PriceOffer } from '../../interfaces/PriceOffer';
+import { discountPercent as computeDiscount, formatPrice } from '../../utils/price';
 import { StoreIcon } from '../store-icon/store-icon';
 
 @Component({
@@ -21,8 +22,7 @@ export class PriceComparison {
   readonly offers = signal<PriceOffer[]>([]);
   readonly currency = computed(() => this.offers()[0]?.currency ?? null);
 
-  private static readonly priceLocale = 'es-AR';
-  private static readonly fallbackCurrency = 'USD';
+  protected readonly formatPrice = formatPrice;
 
   constructor() {
     toObservable(this.title)
@@ -37,25 +37,9 @@ export class PriceComparison {
       .subscribe((offers) => this.offers.set(offers));
   }
 
-  protected formatPrice(amount: number, currency: string | null): string {
-    try {
-      return new Intl.NumberFormat(PriceComparison.priceLocale, {
-        style: 'currency',
-        currency: currency || PriceComparison.fallbackCurrency,
-      }).format(amount);
-    } catch {
-      return `${amount.toFixed(2)} ${currency ?? ''}`.trim();
-    }
-  }
-
   // Uses the shop's own discount and falls back to the prices when it reports none.
   protected discountPercent(offer: PriceOffer): number {
-    if (offer.discountPercent) {
-      return offer.discountPercent;
-    }
-    return offer.normalPrice > offer.salePrice
-      ? Math.round((1 - offer.salePrice / offer.normalPrice) * 100)
-      : 0;
+    return computeDiscount(offer.salePrice, offer.normalPrice, offer.discountPercent);
   }
 
   // The cheapest row is the main action, the rest stay secondary.

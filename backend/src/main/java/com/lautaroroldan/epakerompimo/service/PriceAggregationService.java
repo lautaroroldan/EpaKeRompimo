@@ -17,9 +17,9 @@ public class PriceAggregationService {
         this.priceProviders = priceProviders;
     }
 
-    public List<GameWithPricesDTO> findDeals(String country, Integer offset, Integer limit) {
+    public List<GameWithPricesDTO> findDeals(String country, Integer offset, Integer limit, String sort) {
         return priceProviders.stream()
-                .flatMap(provider -> provider.findDeals(country, offset, limit).stream())
+                .flatMap(provider -> provider.findDeals(country, offset, limit, sort).stream())
                 .toList();
     }
 
