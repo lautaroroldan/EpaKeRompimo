@@ -68,10 +68,11 @@
             <ul class="flex flex-col gap-2">
                 @for (e of favorites.enterprises(); track e.id) {
                 <li class="flex items-center justify-between gap-3 rounded-xl border border-border p-2">
-                    <div class="flex min-w-0 items-center gap-3">
+                    <a [routerLink]="e.name ? ['/company', e.igdbCompanyId] : null"
+                     class="flex min-w-0 items-center gap-3">
                         <app-company-logo [logoUrl]="e.logoUrl" [name]="e.name" />
                         <h3 class="truncate">{{ e.name }}</h3>
-                    </div>
+                    </a>
                     <button type="button" (click)="favorites.removeEnterprise(e.igdbCompanyId)"
                         [disabled]="favorites.saving()"
                         class="inline-flex h-8 shrink-0 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent disabled:opacity-50">
