@@ -80,4 +80,16 @@ public class UserController {
             throw new ForbiddenOperationException("No podés modificar la cuenta de otro usuario");
         }
     }
+    @PostMapping("/verify-email")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void verifyEmail(@RequestParam String token) {
+        userService.verifyEmail(token);
+    }
+
+    @PostMapping("/{id}/resend-verification")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resendVerification(@PathVariable Long id, Authentication authentication) {
+        checkOwner(id, authentication);
+        userService.resendVerification(id);
+    }
 }

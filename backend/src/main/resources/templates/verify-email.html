@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verificá tu mail</title>
+</head>
+<body>
+<h1 style="color: #007bff;">Hola <span th:text="${username}">usuario</span></h1>
+<p>Para terminar de vincular tu mail a EpaKeRompimo, confirmalo con este botón:</p>
+<p>
+    <a th:href="${link}"
+       style="display:inline-block;padding:10px 20px;background:#007bff;color:#ffffff;text-decoration:none;border-radius:6px;">
+        Verificar mi mail
+    </a>
+</p>
+<p>Si el botón no funciona, copiá este link en tu navegador:<br>
+    <span th:text="${link}">link</span></p>
+<p style="color:#666666;font-size:12px;">El link vence en 24 horas. Si no fuiste vos, ignorá este mail.</p>
+</body>
+</html>

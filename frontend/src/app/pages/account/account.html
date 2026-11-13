@@ -15,6 +15,7 @@
         @let i = form.controls.icon;
         @let p = form.controls.password;
         @let c = form.controls.confirmPassword;
+        @let e = form.controls.email;
 
         <div class="flex flex-col gap-1">
             <label for="username" class="text-sm font-medium">Nombre de usuario</label>
@@ -55,6 +56,31 @@
                 autocomplete="new-password" />
             @if ((c.touched || c.dirty) && form.hasError('passwordsMismatch')) {
             <p class="text-sm text-destructive">Las contraseñas no coinciden.</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="email" class="text-sm font-medium">Mail (para recibir notificaciones)</label>
+            <input id="email" hlmInput type="email" formControlName="email" autocomplete="email"
+                placeholder="tucorreo@gmail.com" />
+            @if ((e.touched || e.dirty) && e.invalid) {
+            <p class="text-sm text-destructive">Ingresá un mail válido.</p>
+            }
+            @if (savedEmail(); as saved) {
+            @if (emailVerified()) {
+            <p class="text-sm text-muted-foreground">✓ {{ saved }} está verificado.</p>
+            } @else {
+            <p class="text-sm text-muted-foreground">
+                {{ saved }} está pendiente de verificación. Revisá tu bandeja de entrada.
+                <button type="button" (click)="resendVerification()" [disabled]="resending()"
+                    class="font-medium text-foreground underline disabled:opacity-50">
+                    {{ resending() ? 'Enviando…' : 'Reenviar mail' }}
+                </button>
+            </p>
+            }
+            }
+            @if (resendMessage(); as msg) {
+            <p class="text-sm" role="status">{{ msg }}</p>
             }
         </div>
 

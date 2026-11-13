@@ -39,3 +39,25 @@ export interface Session {
   username: string;
   icon: string | null;
 }
+
+export interface UserResponse {
+  id: number;
+  username: string;
+  icon: string | null;
+  email: string | null;
+  emailVerified: boolean;
+}
+
+export interface UserRequest {
+  username: string;
+  password: string;
+  icon?: string | null;
+  email?: string | null;
+}
+
+export interface UserUpdateRequest {
+  username: string;
+  password?: string;
+  icon?: string | null;
+  email?: string | null;
+}

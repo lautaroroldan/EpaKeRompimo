@@ -7,6 +7,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.springframework.scheduling.annotation.Async;
 
 @Service
 public class EmailServiceManager implements EmailService{
@@ -32,5 +33,25 @@ public class EmailServiceManager implements EmailService{
             throw new RuntimeException("Error en emailServiceManager "+ e.getMessage(), e);
         }
 
+    }
+
+    @Async
+    @Override
+    public void sendVerificationEmail(String destinatario, String username, String link) {
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(destinatario);
+            helper.setSubject("Verificá tu mail en EpaKeRompimo");
+
+            Context context = new Context();
+            context.setVariable("username", username);
+            context.setVariable("link", link);
+            helper.setText(templateEngine.process("verify-email", context), true);
+
+            javaMailSender.send(mimeMessage);
+        } catch (Exception e) {
+            throw new RuntimeException("Error enviando mail de verificación: " + e.getMessage(), e);
+        }
     }
 }

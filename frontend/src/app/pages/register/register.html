@@ -10,6 +10,7 @@
         @let p = form.controls.password;
         @let c = form.controls.confirmPassword;
         @let i = form.controls.icon;
+        @let m = form.controls.email;
 
         <div class="flex flex-col gap-1">
             <label for="username" class="text-sm font-medium">Nombre de usuario</label>
@@ -48,6 +49,17 @@
                 autocomplete="new-password" />
             @if ((c.touched || c.dirty) && form.hasError('passwordsMismatch')) {
             <p class="text-sm text-destructive">Las contraseñas no coinciden.</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="email" class="text-sm font-medium">Mail (opcional)</label>
+            <input id="email" hlmInput type="email" formControlName="email" autocomplete="email"
+                placeholder="tucorreo@gmail.com" />
+            @if ((m.touched || m.dirty) && m.invalid) {
+            <p class="text-sm text-destructive">Ingresá un mail válido.</p>
+            } @else {
+            <p class="text-sm text-muted-foreground">Te mandamos un link para verificarlo.</p>
             }
         </div>
 

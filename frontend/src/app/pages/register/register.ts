@@ -30,6 +30,7 @@ export class Register {
       }),
       password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
       confirmPassword: ['', [Validators.required]],
+      email: ['', [Validators.maxLength(254), Validators.email]],
       icon: ['', [Validators.maxLength(255), Validators.pattern(/^https?:\/\/\S+$/)]],
     },
     { validators: passwordsMatch() },
@@ -50,14 +51,14 @@ export class Register {
       return;
     }
 
-    const { username, password, icon } = this.form.getRawValue();
+    const { username, password, icon, email } = this.form.getRawValue();
     const name = username.trim();
     this.loading.set(true);
     this.error.set(null);
 
     // 1) crea la cuenta  2) inicia sesión con esos datos  3) va a "Mi cuenta"
     this.auth
-      .register({ username: name, password, icon: icon.trim() || null })
+      .register({ username: name, password, icon: icon.trim() || null, email: email.trim() || null,})
       .pipe(switchMap(() => this.auth.login({ username: name, password })))
       .subscribe({
         next: () => this.router.navigate(['/cuenta']),

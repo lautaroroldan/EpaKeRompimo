@@ -34,13 +34,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Registro, login y chequeo de username: públicos
-                        .requestMatchers(HttpMethod.POST, "/api/users", "/api/users/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users", "/api/users/login","/api/users/verify-email").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/exists/**").permitAll()
                         // Comparador de precios: se puede consultar sin cuenta
                         .requestMatchers(HttpMethod.GET, "/api/games/**", "/api/deals/**", "/api/stores/**").permitAll()
                         // Swagger / OpenAPI
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/send-mail").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())  
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
