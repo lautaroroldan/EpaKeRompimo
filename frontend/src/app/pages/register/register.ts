@@ -60,7 +60,7 @@ export class Register {
       .register({ username: name, password, icon: icon.trim() || null })
       .pipe(switchMap(() => this.auth.login({ username: name, password })))
       .subscribe({
-        next: () => this.router.navigate(['/cuenta']),
+        next: () => this.router.navigate(['/favoritos']),
         error: (err) => {
           this.error.set(errorMessage(err, 'No se pudo crear la cuenta.'));
           this.loading.set(false);

@@ -1,11 +1,13 @@
 <div class="relative flex flex-col gap-2 max-w-md">
     <input type="text" hlmInput [value]="input" (input)="onInputChange($event)" (keydown.escape)="onEscape()"
-        class="border-b" />
+        placeholder="Buscar juegos o empresas…" class="border-b" />
 
     @if (open()) {
     <ul
         class="absolute top-full left-0 right-0 z-50 mt-1 max-h-96 w-full overflow-y-auto rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-lg">
+
         @if (games().length > 0) {
+        <li class="px-2 pb-1 pt-1 text-xs font-medium uppercase text-muted-foreground">Juegos</li>
         @for (game of games(); track game.game.id) {
         <li (click)="router.navigate(['/game', game.game.title])"
             class="flex cursor-pointer items-center justify-between gap-2 rounded-xl border-b border-border p-2 hover:bg-accent hover:text-accent-foreground hover:outline-2">
@@ -14,21 +16,41 @@
                     alt="{{ game.game.title }}" class="w-24 h-11 rounded-md object-cover shrink-0" />
                 <h3>{{ game.game.title }}</h3>
             </div>
-            @if (game.prices[0]; as price) {
-            @if (price.salePrice === 0) {
-            <p>Gratis</p>
-            }@else {
-            <p>${{price.salePrice}}</p>
-            }
-            } @else {
-            <p>sin precio</p>
-            }
+            <div class="flex items-center gap-2">
+                @if (game.prices[0]; as price) {
+                @if (price.salePrice === 0) {
+                <p>Gratis</p>
+                }@else {
+                <p>${{price.salePrice}}</p>
+                }
+                } @else {
+                <p>sin precio</p>
+                }
+                <app-favorite-button [itadGameId]="game.game.id" />
+            </div>
         </li>
         }
-        } @else if (loading()) {
+        }
+
+        @if (companies().length > 0) {
+        <li class="px-2 pb-1 pt-3 text-xs font-medium uppercase text-muted-foreground">Empresas</li>
+        @for (company of companies(); track company.igdbCompanyId) {
+        <li class="flex items-center justify-between gap-2 rounded-xl border-b border-border p-2">
+            <div class="flex min-w-0 items-center gap-2">
+                <app-company-logo [logoUrl]="company.logoUrl" [name]="company.name" />
+                <h3 class="truncate">{{ company.name }}</h3>
+            </div>
+            <app-favorite-enterprise-button [igdbCompanyId]="company.igdbCompanyId" [name]="company.name" />
+        </li>
+        }
+        }
+
+        @if (games().length === 0 && companies().length === 0) {
+        @if (loading()) {
         <li class="p-2 text-muted-foreground">Buscando...</li>
         } @else {
-        <li class="p-2 text-muted-foreground">No encontramos juegos con ese nombre.</li>
+        <li class="p-2 text-muted-foreground">No encontramos juegos ni empresas con ese nombre.</li>
+        }
         }
     </ul>
     }

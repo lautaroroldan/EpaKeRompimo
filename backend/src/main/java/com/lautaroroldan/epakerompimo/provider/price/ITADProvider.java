@@ -6,6 +6,7 @@ import com.lautaroroldan.epakerompimo.dto.GameWithPricesDTO;
 import com.lautaroroldan.epakerompimo.dto.PriceDTO;
 import com.lautaroroldan.epakerompimo.dto.StoreDTO;
 import com.lautaroroldan.epakerompimo.provider.gamecatalog.GameCatalogProvider;
+import com.lautaroroldan.epakerompimo.provider.gamecatalog.ITADGameInfoResponse;
 import com.lautaroroldan.epakerompimo.provider.gamecatalog.ITADGameResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -105,7 +106,19 @@ public class ITADProvider extends AbstractApiClient implements PriceProvider, Ga
 
     @Override
     public GameDTO findGameById(String id) {
-        return null;
+        return ApiConnect(() -> {
+            ITADGameInfoResponse response = client.get()
+                    .uri(uri -> uri.path("/games/info/v2")
+                            .queryParam("id", id)
+                            .build())
+                    .retrieve()
+                    .body(ITADGameInfoResponse.class);
+
+            if (response == null) return null;
+
+            String banner = response.assets() != null ? response.assets().banner300() : null;
+            return new GameDTO(response.id(), response.title(), response.slug(), response.type(), banner, "", new String[]{""});
+        }, null);
     }
 
     private GameDTO toGameDTO(ITADGameResponse game) {

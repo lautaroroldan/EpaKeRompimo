@@ -1,6 +1,5 @@
 package com.lautaroroldan.epakerompimo.provider.info;
 
-import com.lautaroroldan.epakerompimo.dto.GameDTO;
 import com.lautaroroldan.epakerompimo.dto.game.GameDetailDTO;
 
 import java.util.List;
