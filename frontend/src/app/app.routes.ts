@@ -26,5 +26,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/account/account').then((m) => m.Account),
   },
+  {
+    path: 'favoritos',
+    title: 'Mis favoritos | EpaKeRompimo',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/favorites/favorites').then((m) => m.Favorites),
+  },
   { path: '**', redirectTo: '' },
 ];

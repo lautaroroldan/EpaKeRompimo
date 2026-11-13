@@ -1,38 +1,61 @@
 <div class="relative flex w-full flex-col gap-2">
     <input type="text" hlmInput [value]="input" (input)="onInputChange($event)" (keydown.escape)="onEscape()"
-        placeholder="Buscá un juego..." aria-label="Buscar un juego" autocomplete="off" class="border-b" />
+        placeholder="Buscá un juego o empresa..." aria-label="Buscar juegos o empresas" autocomplete="off"
+        class="border-b" />
 
     @if (open()) {
     <ul
         class="absolute top-full left-0 right-0 z-50 mt-1 max-h-96 w-full overflow-y-auto rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-lg">
+
         @if (games().length > 0) {
+        <li class="px-2 pb-1 pt-1 text-xs font-medium uppercase text-muted-foreground">Juegos</li>
         @for (game of games(); track game.game.id) {
-        <li>
+        <li class="flex items-center gap-2 rounded-xl border-b border-border p-2">
             <button type="button" (click)="select(game.game.title)"
-                class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl border-b border-border p-2 text-left hover:bg-accent hover:text-accent-foreground hover:outline-2">
+                class="flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 rounded-lg p-1 text-left hover:bg-accent hover:text-accent-foreground">
                 <span class="flex min-w-0 items-center gap-2">
                     <img [src]="game.game.imageUrl ?? 'https://static.vecteezy.com/system/resources/thumbnails/022/059/000/small_2x/no-image-available-icon-vector.jpg'"
                         alt="" class="h-11 w-24 shrink-0 rounded-md object-cover" />
                     <span class="line-clamp-2">{{ game.game.title }}</span>
                 </span>
-                @if (game.prices[0]; as price) {
-                @if (price.salePrice === 0) {
-                <span class="shrink-0 text-sm">Gratis</span>
-                } @else if (price.salePrice != null) {
-                <span class="shrink-0 text-sm">{{ formatPrice(price.salePrice, price.currency) }}</span>
-                } @else {
-                <span class="shrink-0 text-sm text-muted-foreground">sin precio</span>
-                }
-                } @else {
-                <span class="shrink-0 text-sm text-muted-foreground">sin precio</span>
-                }
+                <span class="shrink-0">
+                    @if (game.prices[0]; as price) {
+                    @if (price.salePrice === 0) {
+                    <span class="text-sm">Gratis</span>
+                    } @else if (price.salePrice != null) {
+                    <span class="text-sm">{{ formatPrice(price.salePrice, price.currency) }}</span>
+                    } @else {
+                    <span class="text-sm text-muted-foreground">sin precio</span>
+                    }
+                    } @else {
+                    <span class="text-sm text-muted-foreground">sin precio</span>
+                    }
+                </span>
             </button>
+            <app-favorite-button [itadGameId]="game.game.id" />
         </li>
         }
-        } @else if (loading()) {
+        }
+
+        @if (companies().length > 0) {
+        <li class="px-2 pb-1 pt-3 text-xs font-medium uppercase text-muted-foreground">Empresas</li>
+        @for (company of companies(); track company.igdbCompanyId) {
+        <li class="flex items-center justify-between gap-2 rounded-xl border-b border-border p-2">
+            <div class="flex min-w-0 items-center gap-2">
+                <app-company-logo [logoUrl]="company.logoUrl" [name]="company.name" />
+                <h3 class="truncate">{{ company.name }}</h3>
+            </div>
+            <app-favorite-enterprise-button [igdbCompanyId]="company.igdbCompanyId" [name]="company.name" />
+        </li>
+        }
+        }
+
+        @if (games().length === 0 && companies().length === 0) {
+        @if (loading()) {
         <li class="p-2 text-muted-foreground">Buscando...</li>
         } @else {
-        <li class="p-2 text-muted-foreground">No encontramos juegos con ese nombre.</li>
+        <li class="p-2 text-muted-foreground">No encontramos juegos ni empresas con ese nombre.</li>
+        }
         }
     </ul>
     }

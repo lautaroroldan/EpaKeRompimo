@@ -13,6 +13,9 @@
         <nav class="flex shrink-0 items-center gap-2">
             @if (ready()) {
             @if (auth.session(); as s) {
+            <a routerLink="/favoritos" class="inline-flex h-8 items-center rounded-lg px-3 text-sm hover:bg-accent">
+                Favoritos
+            </a>
             <a routerLink="/cuenta" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-accent">
                 <app-user-avatar [icon]="s.icon" [username]="s.username" />
                 <span class="hidden text-sm sm:inline">{{ s.username }}</span>

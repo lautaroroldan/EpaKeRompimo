@@ -32,7 +32,17 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
-    // Red de seguridad: username duplicado por carrera entre dos requests simultáneos
+    @ExceptionHandler(FavoriteNotFoundException.class)
+    public ProblemDetail handleFavoriteNotFound(FavoriteNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(FavoriteAlreadyExistsException.class)
+    public ProblemDetail handleFavoriteConflict(FavoriteAlreadyExistsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    // Red de seguridad: valor duplicado por carrera entre dos requests simultáneos
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataIntegrity(DataIntegrityViolationException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,

@@ -1,0 +1,86 @@
+<section class="mx-auto w-full max-w-5xl p-6">
+    <h1 class="mb-6 text-2xl font-semibold">Mis favoritos</h1>
+
+    @if (favorites.error(); as msg) {
+    <p class="mb-4 text-sm text-destructive" role="alert">{{ msg }}</p>
+    }
+
+    <!-- Una columna en pantallas chicas; dos lado a lado desde lg -->
+    <div class="grid gap-8 lg:grid-cols-2 lg:items-start">
+
+        <!-- ===== Mis juegos favoritos ===== -->
+        <section aria-labelledby="fav-games-title" class="min-w-0">
+            <h2 id="fav-games-title" class="mb-3 text-lg font-medium">Mis juegos favoritos</h2>
+
+            @if (favorites.loading()) {
+            <p class="text-sm text-muted-foreground">Cargando…</p>
+            } @else if (favorites.games().length === 0) {
+            <p class="text-sm text-muted-foreground">
+                Todavía no guardaste juegos. Buscalos con el buscador y tocá la estrella ☆.
+            </p>
+            } @else {
+            <ul class="flex flex-col gap-2">
+                @for (fav of favorites.games(); track fav.id) {
+                @let best = cheapest(fav.prices);
+                <li class="flex items-center justify-between gap-3 rounded-xl border border-border p-2">
+                    <a [routerLink]="fav.game ? ['/game', fav.game.title] : null"
+                        class="flex min-w-0 items-center gap-3 rounded-lg hover:bg-accent">
+                        <img [src]="fav.game?.imageUrl ?? noImage" [alt]="fav.game?.title ?? 'Sin imagen'"
+                            class="h-11 w-20 shrink-0 rounded-md object-cover sm:w-24" />
+                        <div class="min-w-0">
+                            <h3 class="truncate">{{ fav.game?.title ?? 'Juego no disponible' }}</h3>
+                            <p class="text-sm text-muted-foreground">
+                                @if (best) {
+                                @if (best.salePrice === 0) {
+                                Gratis
+                                } @else {
+                                ${{ best.salePrice | number: '1.0-2' }}
+                                }
+                                · {{ best.store.name }}
+                                } @else {
+                                sin precio
+                                }
+                            </p>
+                        </div>
+                    </a>
+                    <button type="button" (click)="favorites.removeGame(fav.itadGameId)"
+                        [disabled]="favorites.saving()"
+                        class="inline-flex h-8 shrink-0 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent disabled:opacity-50">
+                        Quitar
+                    </button>
+                </li>
+                }
+            </ul>
+            }
+        </section>
+
+        <!-- ===== Mis empresas favoritas ===== -->
+        <section aria-labelledby="fav-companies-title" class="min-w-0">
+            <h2 id="fav-companies-title" class="mb-3 text-lg font-medium">Mis empresas favoritas</h2>
+
+            @if (favorites.loadingEnterprises()) {
+            <p class="text-sm text-muted-foreground">Cargando…</p>
+            } @else if (favorites.enterprises().length === 0) {
+            <p class="text-sm text-muted-foreground">
+                Todavía no guardaste empresas.
+            </p>
+            } @else {
+            <ul class="flex flex-col gap-2">
+                @for (e of favorites.enterprises(); track e.id) {
+                <li class="flex items-center justify-between gap-3 rounded-xl border border-border p-2">
+                    <div class="flex min-w-0 items-center gap-3">
+                        <app-company-logo [logoUrl]="e.logoUrl" [name]="e.name" />
+                        <h3 class="truncate">{{ e.name }}</h3>
+                    </div>
+                    <button type="button" (click)="favorites.removeEnterprise(e.igdbCompanyId)"
+                        [disabled]="favorites.saving()"
+                        class="inline-flex h-8 shrink-0 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent disabled:opacity-50">
+                        Quitar
+                    </button>
+                </li>
+                }
+            </ul>
+            }
+        </section>
+    </div>
+</section>
