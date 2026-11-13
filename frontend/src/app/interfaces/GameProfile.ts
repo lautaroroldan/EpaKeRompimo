@@ -1,3 +1,5 @@
+import { Company } from './Company';
+
 export interface GameDetail {
     externalId: number,
     slug: string,
@@ -8,5 +10,6 @@ export interface GameDetail {
     platforms: string[],
     screenshots: string[],
     trailerUrl: string,
-    tags: string[]
+    tags: string[],
+    companies: Company[]
 }

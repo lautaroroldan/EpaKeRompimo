@@ -5,10 +5,11 @@ import { catchError, of, switchMap, tap } from 'rxjs';
 import { GameDetail } from '../../interfaces/GameProfile';
 import { API_URL } from '../../config/api';
 import { PriceComparison } from '../../components/price-comparison/price-comparison';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-game-profile',
-  imports: [PriceComparison],
+  imports: [PriceComparison, RouterLink],
   templateUrl: './game-profile.html',
   styleUrl: './game-profile.css',
 })
@@ -26,6 +27,9 @@ export class GameProfile {
 
   readonly screenshots = computed(() => this.gameDetail()?.screenshots.slice(0, GameProfile.screenshots) ?? []);
   readonly tags = computed(() => this.gameDetail()?.tags.slice(0, GameProfile.tags) ?? []);
+
+  // The backend ranks credits, so the first company is the recognizable brand.
+  readonly primaryCompany = computed(() => this.gameDetail()?.companies?.[0] ?? null);
 
   constructor() {
     toObservable(this.title)

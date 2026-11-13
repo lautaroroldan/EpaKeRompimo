@@ -1,0 +1,70 @@
+<section class="mx-auto max-w-5xl p-4">
+    @if (company(); as company) {
+    <header class="flex flex-col gap-5 border-b border-border pb-6 sm:flex-row">
+        @if (company.logoUrl && !logoFailed()) {
+        <img [src]="company.logoUrl" [alt]="company.name" (error)="logoFailed.set(true)"
+            class="size-24 shrink-0 rounded-xl border border-border bg-card object-contain p-2" />
+        } @else {
+        <div
+            class="flex size-24 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-2xl font-semibold text-muted-foreground">
+            {{ initials() }}
+        </div>
+        }
+
+        <div class="min-w-0 flex-1">
+            <h1 class="text-3xl font-semibold">{{ company.name }}</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                Empresa
+                @if (company.foundedYear) {
+                <span> · Fundada en {{ company.foundedYear }}</span>
+                }
+            </p>
+            @if (company.websiteUrl) {
+            <a [href]="company.websiteUrl" target="_blank" rel="noopener noreferrer"
+                class="mt-2 inline-flex items-center gap-1.5 text-sm text-soft-periwinkle-300 hover:underline">
+                Sitio web
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true">
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14 21 3" />
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                </svg>
+            </a>
+            }
+            @if (company.description) {
+            <p class="mt-4 max-w-3xl text-sm leading-relaxed">{{ company.description }}</p>
+            }
+        </div>
+    </header>
+
+    <div class="mt-6 flex items-baseline justify-between gap-2">
+        <h2 class="text-lg font-semibold">Juegos</h2>
+        @if (total()) {
+        <p class="text-xs text-muted-foreground">{{ total() }} {{ total() === 1 ? 'juego' : 'juegos' }}</p>
+        }
+    </div>
+
+    @if (games().length) {
+    <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        @for (game of games(); track game.id) {
+        <app-game-card [game]="game" />
+        }
+    </div>
+
+    @if (hasMore()) {
+    <div class="mt-6 flex justify-center">
+        <button type="button" (click)="loadMore()" [disabled]="loadingMore()"
+            class="inline-flex h-10 items-center rounded-lg border border-input px-4 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-60">
+            {{ loadingMore() ? 'Cargando…' : 'Cargar más' }}
+        </button>
+    </div>
+    }
+    } @else {
+    <p class="mt-6 text-sm text-muted-foreground">No encontramos juegos para esta empresa.</p>
+    }
+    } @else if (error(); as message) {
+    <p class="text-destructive">{{ message }}</p>
+    } @else {
+    <p class="text-muted-foreground">{{ loading() ? 'Cargando…' : '' }}</p>
+    }
+</section>
