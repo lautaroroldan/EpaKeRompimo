@@ -43,7 +43,7 @@ public class ITADProvider extends AbstractApiClient implements PriceProvider, Ga
             return responses.stream()
                     .collect(Collectors.toMap(
                             ITADPriceResponse::id,
-                            response -> response.deals().stream()
+                            response -> response.deals() == null ? List.of() : response.deals().stream()
                                     .map(this::toPriceDTO)
                                     .toList()
                     ));
@@ -77,7 +77,15 @@ public class ITADProvider extends AbstractApiClient implements PriceProvider, Ga
     }
 
     private PriceDTO toPriceDTO(ITADDeal deal) {
-        return new PriceDTO(BigDecimal.valueOf(deal.price().amount()), BigDecimal.valueOf(deal.regular().amount()), new StoreDTO(deal.shop().name(), deal.url(), ""), getName());
+        BigDecimal salePrice = toAmount(deal.price());
+        BigDecimal normalPrice = toAmount(deal.regular());
+        return new PriceDTO(salePrice, normalPrice,
+                new StoreDTO(deal.shop().name(), deal.url(), ""), getName(),
+                deal.cut(), deal.price() != null ? deal.price().currency() : null);
+    }
+
+    private static BigDecimal toAmount(ITADPrice price) {
+        return price != null && price.amount() != null ? BigDecimal.valueOf(price.amount()) : null;
     }
 
     @Override
@@ -95,7 +103,8 @@ public class ITADProvider extends AbstractApiClient implements PriceProvider, Ga
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<ITADGameResponse>>() {});
 
-            log.info(responses.toString());
+            if (responses == null) return List.of();
+
             return responses.stream()
                     .filter(x -> x.type()!= null && x.type().equals("game"))
                     .map(this::toGameDTO)

@@ -6,6 +6,8 @@ public record PriceDTO(
         BigDecimal salePrice,
         BigDecimal normalPrice,
         StoreDTO store,
-        String providerName
+        String providerName,
+        Integer discountPercent,
+        String currency
 ) {
 }

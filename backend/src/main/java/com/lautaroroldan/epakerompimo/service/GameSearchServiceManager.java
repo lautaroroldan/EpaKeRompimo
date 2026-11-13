@@ -4,17 +4,16 @@ import com.lautaroroldan.epakerompimo.dto.GameDTO;
 import com.lautaroroldan.epakerompimo.dto.GameWithPricesDTO;
 import com.lautaroroldan.epakerompimo.dto.PriceDTO;
 import com.lautaroroldan.epakerompimo.dto.game.GameDetailDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class GameSearchServiceManager implements GameSearchService{
-
-    private static final Logger log = LoggerFactory.getLogger(GameSearchServiceManager.class);
 
     private final GameCatalogService gameCatalogService;
     private final PriceAggregationService priceAggregationService;
@@ -26,10 +25,6 @@ public class GameSearchServiceManager implements GameSearchService{
         this.gameCatalogService = gameCatalogService;
         this.priceAggregationService = priceAggregationService;
         this.gameDetailService = gameDetailService;
-    }
-
-    private List<GameDTO> findGameByTitle(String title){
-        return gameCatalogService.searchByTitle(title);
     }
 
     @Override
@@ -53,4 +48,37 @@ public class GameSearchServiceManager implements GameSearchService{
         return gameDetailService.findByTitle(title);
     }
 
+    /**
+     * Every store's price for the game that best matches the title, cheapest
+     * first, so the profile never shows a DLC or a different release that ITAD
+     * might rank higher.
+     */
+    @Override
+    public List<PriceDTO> findOffersByTitle(String title, String country) {
+        GameDTO game = preferExactTitle(gameCatalogService.searchByTitle(title), title);
+        if (game == null) {
+            return List.of();
+        }
+        return priceAggregationService
+                .pricesByGameId(new String[]{game.id()}, country)
+                .getOrDefault(game.id(), List.of())
+                .stream()
+                .filter(price -> price.salePrice() != null)
+                .sorted(Comparator.comparing(PriceDTO::salePrice))
+                // A shop can quote the same game twice (different DRM or
+                // platform); the sort already left the cheapest one first.
+                .collect(Collectors.toMap(price -> price.store().name(), price -> price,
+                        (cheapest, duplicate) -> cheapest, LinkedHashMap::new))
+                .values()
+                .stream()
+                .toList();
+    }
+
+    private static GameDTO preferExactTitle(List<GameDTO> candidates, String title) {
+        GameDTO exact = candidates.stream()
+                .filter(candidate -> TitleNormalizer.sameTitle(candidate.title(), title))
+                .findFirst()
+                .orElse(null);
+        return exact != null ? exact : candidates.stream().findFirst().orElse(null);
+    }
 }
