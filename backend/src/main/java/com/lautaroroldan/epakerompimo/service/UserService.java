@@ -21,4 +21,7 @@ public interface UserService {
     boolean existsByUsername(String username);
 
     void deleteById(Long id);
+    void verifyEmail(String token);
+
+    void resendVerification(Long id);
 }

@@ -15,6 +15,7 @@
         @let i = form.controls.icon;
         @let p = form.controls.password;
         @let c = form.controls.confirmPassword;
+        @let e = form.controls.email;
 
         <div class="flex flex-col gap-1">
             <label for="username" class="text-sm font-medium">Nombre de usuario</label>
@@ -57,6 +58,30 @@
             <p class="text-sm text-destructive">Las contraseñas no coinciden.</p>
             }
         </div>
+            <div class="flex flex-col gap-1">
+            <label for="email" class="text-sm font-medium">Mail (para notificaciones)</label>
+            <input id="email" hlmInput type="email" formControlName="email" autocomplete="email"
+                placeholder="tucorreo@gmail.com" />
+            @if ((e.touched || e.dirty) && e.invalid) {
+            <p class="text-sm text-destructive">Ingresá un mail válido.</p>
+            }
+            @if (confirmedEmail(); as confirmed) {
+            <p class="text-sm text-muted-foreground">✓ Mail confirmado: {{ confirmed }}</p>
+            }
+            @if (pendingEmail(); as pending) {
+            <p class="text-sm text-muted-foreground">
+                Falta confirmar {{ pending }}. Revisá tu bandeja de entrada (y spam): el mail se guarda cuando
+                hagas clic en el link.
+                <button type="button" (click)="resendVerification()" [disabled]="resending()"
+                    class="font-medium text-foreground underline disabled:opacity-50">
+                    {{ resending() ? 'Enviando…' : 'Reenviar mail' }}
+                </button>
+            </p>
+            }
+            @if (resendMessage(); as msg) {
+            <p class="text-sm" role="status">{{ msg }}</p>
+            }
+        </div>
 
         @if (error(); as msg) {
         <p class="text-sm text-destructive" role="alert">{{ msg }}</p>
@@ -69,7 +94,9 @@
             class="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50">
             {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
         </button>
+
     </form>
+    
 
     <div class="mt-10 border-t border-border pt-6">
         <h2 class="mb-1 text-lg font-medium text-destructive">Eliminar cuenta</h2>

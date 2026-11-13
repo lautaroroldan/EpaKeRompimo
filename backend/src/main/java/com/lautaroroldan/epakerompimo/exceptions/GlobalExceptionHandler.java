@@ -56,4 +56,13 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detalle);
     }
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ProblemDetail handleEmailConflict(EmailAlreadyExistsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailVerificationException.class)
+    public ProblemDetail handleEmailVerification(EmailVerificationException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 }

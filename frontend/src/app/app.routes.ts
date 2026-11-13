@@ -32,5 +32,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/favorites/favorites').then((m) => m.Favorites),
   },
+    {
+    path: 'verificar-email',
+    title: 'Confirmar mail | EpaKeRompimo',
+    loadComponent: () => import('./pages/verify-email/verify-email').then((m) => m.VerifyEmail),
+  },
+
   { path: '**', redirectTo: '' },
 ];

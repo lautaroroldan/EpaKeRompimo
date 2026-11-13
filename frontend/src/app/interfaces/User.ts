@@ -3,6 +3,8 @@ export interface UserResponse {
   id: number;
   username: string;
   icon: string | null;
+  email: string | null;
+  pendingEmail: string | null;
 }
 
 // POST /api/users/login
@@ -23,6 +25,7 @@ export interface UserRequest {
   username: string;
   password: string;
   icon?: string | null;
+  email?: string | null;
 }
 
 // PUT /api/users/{id}  (si no se manda password, el backend conserva la actual)
@@ -30,6 +33,7 @@ export interface UserUpdateRequest {
   username: string;
   password?: string;
   icon?: string | null;
+  email?: string | null;
 }
 
 // Lo que guardamos en el navegador mientras la persona está logueada

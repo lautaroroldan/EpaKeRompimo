@@ -24,4 +24,11 @@ export class UserService {
   existsByUsername(username: string) {
     return this.http.get<boolean>(`${API_URL}/users/exists/${encodeURIComponent(username)}`);
   }
+   verifyEmail(token: string) {
+    return this.http.post<void>(`${API_URL}/users/verify-email`, null, { params: { token } });
+  }
+
+  resendVerification(id: number) {
+    return this.http.post<void>(`${API_URL}/users/${id}/resend-verification`, null);
+  }
 }

@@ -3,6 +3,7 @@ package com.lautaroroldan.epakerompimo.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.time.Instant;
 
 @Entity
 @Table(name = "users")
@@ -17,6 +18,14 @@ public class User {
     @Column(nullable = false, length = 60)
     private String password;
     private String icon;
+    @Column(unique = true, length = 254)
+    private String email;
+    // Mail que cargó y todavía no confirmó
+    @Column(length = 254)
+    private String pendingEmail;
+    @Column(length = 64)
+    private String verificationToken;
+    private Instant verificationTokenExpiry;
 
     public User() {
     }

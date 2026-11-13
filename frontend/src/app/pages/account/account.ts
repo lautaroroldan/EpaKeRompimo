@@ -33,6 +33,7 @@ export class Account {
         asyncValidators: [usernameAvailable(this.users, () => this.session()?.username ?? null)],
       }),
       icon: ['', [Validators.maxLength(255), Validators.pattern(/^https?:\/\/\S+$/)]],
+      email: ['', [Validators.maxLength(254), Validators.email]],
       password: ['', [Validators.minLength(8), Validators.maxLength(72)]],
       confirmPassword: [''],
     },
@@ -48,6 +49,12 @@ export class Account {
   protected readonly error = signal<string | null>(null);
   protected readonly success = signal<string | null>(null);
 
+    // Lo que ya está guardado en el backend (no lo que se está tipeando)
+  protected readonly confirmedEmail = signal<string | null>(null);
+  protected readonly pendingEmail = signal<string | null>(null);
+  protected readonly resending = signal(false);
+  protected readonly resendMessage = signal<string | null>(null);
+
   protected readonly confirmingDelete = signal(false);
   protected readonly deleting = signal(false);
   protected readonly deleteError = signal<string | null>(null);
@@ -62,7 +69,9 @@ export class Account {
     // Trae los datos actuales desde el backend (GET /api/users/{id})
     this.users.findById(current.id).subscribe({
       next: (user) => {
-        this.form.patchValue({ username: user.username, icon: user.icon ?? '' });
+        this.form.patchValue({ username: user.username, icon: user.icon ?? '', email: user.pendingEmail ?? user.email ?? '', });
+        this.confirmedEmail.set(user.email);
+        this.pendingEmail.set(user.pendingEmail);
         this.auth.updateSession({ username: user.username, icon: user.icon });
         this.loading.set(false);
       },
@@ -84,12 +93,13 @@ export class Account {
       return;
     }
 
-    const { username, icon, password } = this.form.getRawValue();
+    const { username, icon, password, email } = this.form.getRawValue();
     // OJO: si password va vacía NO se manda. El backend la valida con @Size(min = 8)
     // y rechazaría un "" aunque la intención sea "no cambiar nada".
     const request: UserUpdateRequest = {
       username: username.trim(),
       icon: icon.trim() || null,
+      email: email.trim() || null,
       ...(password ? { password } : {}),
     };
 
@@ -99,10 +109,18 @@ export class Account {
 
     this.users.update(current.id, request).subscribe({
       next: (user) => {
+        const nuevoPendiente = !!user.pendingEmail && user.pendingEmail !== this.pendingEmail();
+        this.confirmedEmail.set(user.email);
+        this.pendingEmail.set(user.pendingEmail);
+        this.resendMessage.set(null);
         this.auth.updateSession({ username: user.username, icon: user.icon });
-        this.form.patchValue({ password: '', confirmPassword: '' });
+        this.form.patchValue({ email: user.pendingEmail ?? user.email ?? '',
+          password: '',
+          confirmPassword: '',});
         this.form.markAsPristine();
-        this.success.set('Tus datos se actualizaron.');
+        this.success.set( nuevoPendiente
+            ? `Tus datos se actualizaron. Te mandamos un mail a ${user.pendingEmail}: se guarda cuando lo confirmes.`
+            : 'Tus datos se actualizaron.',);
         this.saving.set(false);
       },
       error: (err) => {
@@ -112,6 +130,26 @@ export class Account {
     });
   }
 
+  protected resendVerification() {
+    const current = this.session();
+    if (!current) return;
+
+    this.resending.set(true);
+    this.resendMessage.set(null);
+    this.error.set(null);
+
+    this.users.resendVerification(current.id).subscribe({
+      next: () => {
+        this.resendMessage.set('Listo, te mandamos el mail de nuevo. Revisá también spam.');
+        this.resending.set(false);
+      },
+      error: (err) => {
+        this.error.set(errorMessage(err, 'No se pudo reenviar el mail.'));
+        this.resending.set(false);
+      },
+    });
+  }
+  
   protected askDelete() {
     this.deleteError.set(null);
     this.confirmingDelete.set(true);
