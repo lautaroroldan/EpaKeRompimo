@@ -17,12 +17,35 @@ public record IGDBGameResponse(
         String storyline,
         Long first_release_date,
         IGDBCover cover,
-        List<IGDBPlatform> platforms
+        List<IGDBNamed> platforms,
+        List<IGDBNamed> genres,
+        List<IGDBNamed> themes,
+        List<IGDBNamed> keywords,
+        List<IGDBScreenshot> screenshots,
+        List<IGDBVideo> videos,
+        List<IGDBInvolvedCompany> involved_companies
 ) {
 
     public record IGDBCover(String url) {
     }
 
-    public record IGDBPlatform(String name) {
+    /** Reference entities exposed by IGDB that only contribute a display name. */
+    public record IGDBNamed(String name) {
+    }
+
+    public record IGDBScreenshot(String url) {
+    }
+
+    public record IGDBVideo(String video_id, String name) {
+    }
+
+    /**
+     * Credit row between a game and a company. {@code id} is the row's own id,
+     * not the company id, and it preserves IGDB's credit order.
+     */
+    public record IGDBInvolvedCompany(long id, IGDBCompany company, boolean developer, boolean publisher) {
+    }
+
+    public record IGDBCompany(long id, String name) {
     }
 }

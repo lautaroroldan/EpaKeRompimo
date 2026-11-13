@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/exists/**").permitAll()
                         // Comparador de precios: se puede consultar sin cuenta
                         .requestMatchers(HttpMethod.GET, "/api/games/**", "/api/deals/**", "/api/prices/**",
-                                "/api/stores/**", "/api/details/**").permitAll()
+                                "/api/companies/**", "/api/stores/**", "/api/details/**").permitAll()
                         // Swagger / OpenAPI
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
