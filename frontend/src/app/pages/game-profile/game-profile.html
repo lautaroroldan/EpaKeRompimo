@@ -1,1 +1,44 @@
-<p>game-profile works!</p>
+<section class="mx-auto max-w-5xl p-4">
+    @if (gameDetail(); as game) {
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        @if (screenshots().length) {
+        <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 lg:col-span-2">
+            <img [src]="screenshots()[activeScreenshot()]" [alt]="'Screenshot de ' + game.title"
+                class="col-span-1 aspect-video w-full overflow-hidden rounded-xl object-cover sm:col-span-3" />
+
+            @for (screenshot of screenshots(); track $index) {
+            <button type="button" (click)="activeScreenshot.set($index)"
+                [attr.aria-current]="$index === activeScreenshot()"
+                class="relative overflow-hidden rounded-xl outline-offset-2 hover:outline-2 hover:outline-primary"
+                [class.outline-2]="$index === activeScreenshot()"
+                [class.outline-primary]="$index === activeScreenshot()">
+                <img [src]="screenshot" [alt]="'Screenshot ' + ($index + 1) + ' de ' + game.title" loading="lazy"
+                    class="aspect-video w-full object-cover" />
+            </button>
+            }
+        </div>
+        } @else {
+        <p class="mt-8 text-sm text-muted-foreground">Sin screenshots disponibles.</p>
+        }
+        <div class="min-w-0 lg:col-span-1">
+            <h1 class="text-3xl font-semibold">{{ game.title }}</h1>
+            @if (tags().length) {
+            <ul class="mt-6 flex flex-wrap gap-2">
+                @for (tag of tags(); track tag) {
+                <li class="rounded-full border border-border px-3 py-1 text-xs">{{ tag }}</li>
+                }
+            </ul>
+            }
+            <p class="mt-4 text-sm leading-relaxed">{{ game.description }}</p>
+        </div>
+    </div>
+
+    <app-price-comparison [title]="game.title" />
+
+    } @else if (error(); as message) {
+    <p class="text-destructive">{{ message }}</p>
+    } @else {
+    <p class="text-muted-foreground">{{ loading() ? 'Cargando…' : '' }}</p>
+    }
+</section>
