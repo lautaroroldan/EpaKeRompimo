@@ -166,13 +166,27 @@ Returns the same `GameWithPricesDTO` shape as `/api/games`.
   "description": "Grand Theft Auto V is an open world action-adventure video game...",
   "released": "2013-09-17",
   "coverImageUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big/....jpg",
-  "platforms": ["PC (Microsoft Windows)", "PlayStation 4"]
+  "platforms": ["PC (Microsoft Windows)", "PlayStation 4"],
+  "screenshots": ["https://images.igdb.com/igdb/image/upload/t_screenshot_big/....jpg"],
+  "trailerUrl": "https://www.youtube.com/embed/....",
+  "tags": ["Action", "Adventure", "Open world"]
 }
 ```
 
 > `description` is IGDB's `summary` (falling back to `storyline`), so it is
 > noticeably shorter than a full store page description. IGDB returns plain
 > text, not HTML.
+>
+> `tags` merges IGDB's `genres`, `themes` and `keywords` (deduplicated, capped
+> at 12). Genres and themes are curated; keywords are user-contributed and can
+> be noisy.
+>
+> Screenshots and videos are only expanded for this endpoint: the detail lookup
+> resolves the match first and then fetches the full record by id, because
+> expanding media for every search result would multiply the payload.
+>
+> When several games match the search, an exact title match (ignoring accents,
+> case and punctuation) wins; otherwise IGDB's own relevance order is used.
 
 ### Users
 
