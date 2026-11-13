@@ -39,7 +39,7 @@ export class Login {
     this.error.set(null);
 
     this.auth.login({ username: username.trim(), password }).subscribe({
-      next: () => this.router.navigate(['/cuenta']),
+      next: () => this.router.navigate(['/favoritos']),
       error: (err) => {
         this.error.set(errorMessage(err, 'No se pudo iniciar sesión.'));
         this.loading.set(false);
