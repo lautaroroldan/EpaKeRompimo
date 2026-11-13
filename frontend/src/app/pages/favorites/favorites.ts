@@ -1,13 +1,13 @@
-import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GamePrice } from '../../interfaces/Game';
 import { FavoriteService } from '../../services/favorite-service';
 import { CompanyLogo } from '../../components/company-logo/company-logo';
+import { formatPrice } from '../../utils/price';
 
 @Component({
   selector: 'app-favorites',
-  imports: [DecimalPipe, RouterLink, CompanyLogo],
+  imports: [RouterLink, CompanyLogo],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './favorites.html',
 })
@@ -23,9 +23,14 @@ export class Favorites {
     this.favorites.loadEnterprises();
   }
 
-  // De todas las tiendas, la de menor precio
-  protected cheapest(prices: GamePrice[]): GamePrice | null {
-    if (prices.length === 0) return null;
-    return prices.reduce((min, p) => (p.salePrice < min.salePrice ? p : min));
+  // De todas las tiendas, la de menor precio (ignora las que no tienen precio)
+  protected cheapest(prices: GamePrice[]): (GamePrice & { salePrice: number }) | null {
+    const withPrice = prices.filter(
+      (price): price is GamePrice & { salePrice: number } => price.salePrice != null,
+    );
+    if (withPrice.length === 0) return null;
+    return withPrice.reduce((min, p) => (p.salePrice < min.salePrice ? p : min));
   }
+
+  protected readonly formatPrice = formatPrice;
 }

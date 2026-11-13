@@ -34,7 +34,7 @@
                                 @if (best.salePrice === 0) {
                                 Gratis
                                 } @else {
-                                ${{ best.salePrice | number: '1.0-2' }}
+                                {{ formatPrice(best.salePrice, best.currency) }}
                                 }
                                 · {{ best.store.name }}
                                 } @else {
