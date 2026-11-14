@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lautaroroldan.epakerompimo.exceptions.EmailAlreadyExistsException;
 import com.lautaroroldan.epakerompimo.exceptions.EmailVerificationException;
 import org.springframework.beans.factory.annotation.Value;
-
+import com.lautaroroldan.epakerompimo.entity.UserEmail;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
@@ -140,84 +140,81 @@ public class UserServiceManager implements UserService {
     }
 
     private UserResponse toResponse(User user) {
+        UserEmail mail = user.getEmail();
         return new UserResponse(user.getIdUser(), user.getUsername(), user.getIcon(),
-                user.getEmail(), user.getPendingEmail());
+                mail != null ? mail.getAddress() : null,
+                mail != null ? mail.getPendingAddress() : null);
     }
+
     @Override
     @Transactional
     public void verifyEmail(String token) {
-        User user = userRepository.findByVerificationToken(token)
-                .filter(u -> u.getPendingEmail() != null
-                        && u.getVerificationTokenExpiry() != null
-                        && u.getVerificationTokenExpiry().isAfter(Instant.now()))
+        User user = userRepository.findByEmail_VerificationToken(token)
+                .filter(u -> u.getEmail().tokenIsValid())
                 .orElseThrow(() -> new EmailVerificationException(
                         "El link de confirmación no es válido o ya venció"));
 
+        UserEmail mail = user.getEmail();
+
         // Por si otra cuenta confirmó el mismo mail mientras tanto
-        ensureEmailFree(user.getPendingEmail(), user.getIdUser());
+        ensureEmailFree(mail.getPendingAddress(), user.getIdUser());
 
         // Recién acá el mail se guarda como definitivo
-        user.setEmail(user.getPendingEmail());
-        clearPending(user);
+        mail.confirm();
     }
 
     @Override
     @Transactional
     public void resendVerification(Long id) {
         User user = getOrThrow(id);
-        if (user.getPendingEmail() == null) {
+        UserEmail mail = user.getEmail();
+        if (mail == null || mail.getPendingAddress() == null) {
             throw new EmailVerificationException("No hay ningún mail pendiente de confirmar");
         }
-        issueToken(user);
+        mail.issueToken();
         sendVerificationEmail(user);
     }
 
     // Devuelve true si hay que mandar un mail de confirmación.
     // El mail nuevo NO reemplaza al confirmado: queda como pendiente hasta que se confirme.
     private boolean applyEmail(User user, String rawEmail) {
-        String email = (rawEmail == null || rawEmail.isBlank()) ? null : rawEmail.trim().toLowerCase();
+        String address = (rawEmail == null || rawEmail.isBlank()) ? null : rawEmail.trim().toLowerCase();
+        UserEmail mail = user.getEmail();
 
-        if (email == null) {                              // lo borró: se quita el confirmado y el pendiente
-            user.setEmail(null);
-            clearPending(user);
+        if (address == null) {                                  // lo borró: se quita el confirmado y el pendiente
+            user.setEmail(null);                                // orphanRemoval borra la fila
             return false;
         }
-        if (email.equals(user.getEmail())) {              // volvió a su mail confirmado: cancela el pendiente
-            clearPending(user);
+        if (mail != null && address.equals(mail.getAddress())) {          // volvió a su mail confirmado: cancela el pendiente
+            mail.clearPending();
             return false;
         }
-        if (email.equals(user.getPendingEmail())) {       // ya estaba pendiente: no se reenvía solo
+        if (mail != null && address.equals(mail.getPendingAddress())) {   // ya estaba pendiente: no se reenvía solo
             return false;
         }
 
-        ensureEmailFree(email, user.getIdUser());
-        user.setPendingEmail(email);
-        issueToken(user);
+        ensureEmailFree(address, user.getIdUser());
+        if (mail == null) {
+            mail = new UserEmail();
+            user.setEmail(mail);
+        }
+        mail.setPendingAddress(address);
+        mail.issueToken();
         return true;
     }
 
     // Ocupado = otra cuenta ya lo tiene confirmado
-    private void ensureEmailFree(String email, Long userId) {
-        userRepository.findByEmail(email)
+    private void ensureEmailFree(String address, Long userId) {
+        userRepository.findByEmail_Address(address)
                 .filter(owner -> !owner.getIdUser().equals(userId))
                 .ifPresent(owner -> {
-                    throw new EmailAlreadyExistsException(email);
+                    throw new EmailAlreadyExistsException(address);
                 });
     }
 
-    private void issueToken(User user) {
-        user.setVerificationToken(UUID.randomUUID().toString());
-        user.setVerificationTokenExpiry(Instant.now().plus(24, ChronoUnit.HOURS));
-    }
-
-    private void clearPending(User user) {
-        user.setPendingEmail(null);
-        user.setVerificationToken(null);
-        user.setVerificationTokenExpiry(null);
-    }
-
     private void sendVerificationEmail(User user) {
-        String link = frontendUrl + "/verificar-email?token=" + user.getVerificationToken();
-        emailService.sendVerificationEmail(user.getPendingEmail(), user.getUsername(), link);
+        UserEmail mail = user.getEmail();
+        String link = frontendUrl + "/verificar-email?token=" + mail.getVerificationToken();
+        emailService.sendVerificationEmail(mail.getPendingAddress(), user.getUsername(), link);
     }
 }

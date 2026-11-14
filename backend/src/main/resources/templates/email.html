@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${heading}">Título del mail</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f8;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:24px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="560" cellpadding="0" cellspacing="0"
+                   style="max-width:560px;width:100%;background:#ffffff;border-radius:12px;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#111322;">
+
+                <!-- Marca -->
+                <tr>
+                    <td style="padding:24px 32px 0 32px;font-size:18px;font-weight:700;color:#5306f9;">
+                        EpaKeRompimo
+                    </td>
+                </tr>
+
+                <!-- Título -->
+                <tr>
+                    <td style="padding:16px 32px 0 32px;">
+                        <h1 style="margin:0;font-size:22px;" th:text="${heading}">Hola usuario</h1>
+                    </td>
+                </tr>
+
+                <!-- Párrafos -->
+                <tr>
+                    <td style="padding:8px 32px 0 32px;font-size:15px;line-height:1.5;">
+                        <p th:each="parrafo : ${paragraphs}" th:text="${parrafo}" style="margin:12px 0 0 0;">
+                            Texto de ejemplo del mail.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Botón (solo si hay buttonUrl) -->
+                <tr th:if="${buttonUrl != null}">
+                    <td style="padding:24px 32px 0 32px;">
+                        <a th:href="${buttonUrl}" th:text="${buttonLabel}"
+                           style="display:inline-block;padding:12px 24px;background:#5306f9;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">
+                            Botón de ejemplo
+                        </a>
+                        <p style="margin:16px 0 0 0;font-size:12px;color:#666666;">
+                            Si el botón no funciona, copiá este link en tu navegador:<br>
+                            <span th:text="${buttonUrl}" style="word-break:break-all;">https://ejemplo.com/link</span>
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Pie (opcional). La fila existe siempre para mantener el margen inferior -->
+                <tr>
+                    <td style="padding:24px 32px 32px 32px;font-size:12px;color:#666666;">
+                        <span th:if="${footer != null}" th:text="${footer}">Texto chico al final.</span>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
