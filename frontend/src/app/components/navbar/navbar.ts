@@ -4,11 +4,11 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../../services/auth-service';
 import { InputGame } from '../input-game/input-game';
-import { UserAvatar } from '../user-avatar/user-avatar';
+import { UserMenu } from '../user-menu/user-menu';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, InputGame, UserAvatar],
+  imports: [RouterLink, InputGame, UserMenu],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './navbar.html',
 })
@@ -36,10 +36,5 @@ export class Navbar {
 
   constructor() {
     afterNextRender(() => this.ready.set(true));
-  }
-
-  protected logout() {
-    this.auth.logout();
-    this.router.navigate(['/']);
   }
 }

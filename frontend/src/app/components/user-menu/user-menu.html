@@ -1,0 +1,60 @@
+@if (auth.session(); as s) {
+<div class="relative">
+    <button #menuButton type="button" (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()" aria-controls="user-menu"
+        class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+        <app-user-avatar [icon]="s.icon" [username]="s.username" />
+        <span class="hidden max-w-32 truncate text-sm sm:inline">{{ s.username }}</span>
+        <span class="text-xs text-muted-foreground transition-transform duration-150"
+            [class.rotate-180]="menuOpen()" aria-hidden="true">▾</span>
+    </button>
+
+    @if (menuOpen()) {
+    <div id="user-menu"
+        class="absolute right-0 z-50 mt-2 w-60 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-lg">
+        <div class="px-3 py-2">
+            <p class="truncate text-sm font-medium">{{ s.username }}</p>
+            <p class="text-xs text-muted-foreground">Sesión iniciada</p>
+        </div>
+
+        <div class="my-1 border-t border-border"></div>
+
+        <a routerLink="/favoritos" (click)="closeMenu()"
+            class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path
+                    d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.8-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8Z" />
+            </svg>
+            Mis favoritos
+        </a>
+
+        <a routerLink="/cuenta" (click)="closeMenu()"
+            class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 21a8 8 0 0 0-16 0" />
+                <circle cx="12" cy="8" r="4" />
+            </svg>
+            <span class="flex min-w-0 flex-col">
+                <span>Mi perfil</span>
+                <span class="text-xs text-muted-foreground">Cuenta y contraseña</span>
+            </span>
+        </a>
+
+        <div class="my-1 border-t border-border"></div>
+
+        <button type="button" (click)="logout()"
+            class="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 focus-visible:bg-destructive/10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <path d="m16 17 5-5-5-5" />
+                <path d="M21 12H9" />
+            </svg>
+            Cerrar sesión
+        </button>
+    </div>
+    }
+</div>
+}
