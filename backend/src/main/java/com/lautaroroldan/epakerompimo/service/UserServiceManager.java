@@ -4,6 +4,7 @@ import com.lautaroroldan.epakerompimo.dto.user.LoginRequest;
 import com.lautaroroldan.epakerompimo.dto.user.UserRequest;
 import com.lautaroroldan.epakerompimo.dto.user.UserResponse;
 import com.lautaroroldan.epakerompimo.dto.user.UserUpdateRequest;
+import com.lautaroroldan.epakerompimo.enums.NotificationType;
 import com.lautaroroldan.epakerompimo.entity.User;
 import com.lautaroroldan.epakerompimo.exceptions.InvalidCredentialsException;
 import com.lautaroroldan.epakerompimo.exceptions.UserNotFoundException;
@@ -16,12 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.lautaroroldan.epakerompimo.exceptions.EmailAlreadyExistsException;
 import com.lautaroroldan.epakerompimo.exceptions.EmailVerificationException;
+import com.lautaroroldan.epakerompimo.enums.NotificationMessage;
 import org.springframework.beans.factory.annotation.Value;
 import com.lautaroroldan.epakerompimo.entity.UserEmail;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.UUID;
+import com.lautaroroldan.epakerompimo.repository.NotificationRepository;
+
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,19 +33,23 @@ public class UserServiceManager implements UserService {
     private final FavoriteGameRepository favoriteGameRepository;
     private final FavoriteEnterpriseRepository favoriteEnterpriseRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final NotificationService notificationService;
     private final String frontendUrl;
+    private final NotificationRepository notificationRepository;
 
     public UserServiceManager(UserRepository userRepository,
                               FavoriteGameRepository favoriteGameRepository,
                               FavoriteEnterpriseRepository favoriteEnterpriseRepository,
-                              PasswordEncoder passwordEncoder,EmailService emailService,
+                              PasswordEncoder passwordEncoder,
+                              NotificationRepository notificationRepository,
+                              NotificationService notificationService,
                               @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl) {
         this.userRepository = userRepository;
         this.favoriteGameRepository = favoriteGameRepository;
         this.favoriteEnterpriseRepository = favoriteEnterpriseRepository;
+        this.notificationRepository = notificationRepository;
         this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
+        this.notificationService = notificationService;
         this.frontendUrl = frontendUrl;
     }
 
@@ -130,6 +136,7 @@ public class UserServiceManager implements UserService {
         // Primero los favoritos: tienen una clave foránea hacia el usuario
         favoriteGameRepository.deleteByUser_IdUser(id);
         favoriteEnterpriseRepository.deleteByUser_IdUser(id);
+        notificationRepository.deleteByUser_IdUser(id);
         userRepository.deleteById(id);
     }
 
@@ -215,6 +222,14 @@ public class UserServiceManager implements UserService {
     private void sendVerificationEmail(User user) {
         UserEmail mail = user.getEmail();
         String link = frontendUrl + "/verificar-email?token=" + mail.getVerificationToken();
-        emailService.sendVerificationEmail(mail.getPendingAddress(), user.getUsername(), link);
+        notificationService.send(
+                user,
+                mail.getPendingAddress(),
+                NotificationType.EMAIL_VERIFICATION,
+                "Confirmá tu mail en EpaKeRompimo",
+                List.of(NotificationMessage.VERIFY_EMAIL_INSTRUCTIONS),
+                "Confirmar mi mail", link,
+                NotificationMessage.LINK_EXPIRES_FOOTER,
+                Map.of());
     }
 }

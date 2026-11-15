@@ -15,6 +15,8 @@ import com.lautaroroldan.epakerompimo.repository.FavoriteGameRepository;
 import com.lautaroroldan.epakerompimo.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.lautaroroldan.epakerompimo.event.FavoriteGameAddedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,15 +32,18 @@ public class FavoriteGameServiceManager implements FavoriteGameService {
     private final UserRepository userRepository;
     private final List<PriceProvider> priceProviders;
     private final List<GameCatalogProvider> gameCatalogProviders;
+    private final ApplicationEventPublisher eventPublisher;
 
     public FavoriteGameServiceManager(FavoriteGameRepository favoriteGameRepository,
                                       UserRepository userRepository,
                                       List<PriceProvider> priceProviders,
-                                      List<GameCatalogProvider> gameCatalogProviders) {
+                                      List<GameCatalogProvider> gameCatalogProviders,
+                                      ApplicationEventPublisher eventPublisher) {
         this.favoriteGameRepository = favoriteGameRepository;
         this.userRepository = userRepository;
         this.priceProviders = priceProviders;
         this.gameCatalogProviders = gameCatalogProviders;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -91,6 +96,7 @@ public class FavoriteGameServiceManager implements FavoriteGameService {
         favorite.setItadGameId(request.itadGameId());
 
         FavoriteGame saved = favoriteGameRepository.save(favorite);
+        eventPublisher.publishEvent(new FavoriteGameAddedEvent(idUser, saved.getItadGameId()));
         return new FavoriteGameResponse(saved.getId(), saved.getItadGameId(), null, List.of());
     }
 

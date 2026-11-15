@@ -1,7 +1,6 @@
 package com.lautaroroldan.epakerompimo.service;
-import com.lautaroroldan.epakerompimo.dto.email.EmailContentDTO;
+import com.lautaroroldan.epakerompimo.entity.Notification;
 
 public interface EmailService {
-    void send(String destinatario, String asunto, EmailContentDTO content);
-    void sendVerificationEmail(String destinatario, String username, String link);
+    void send(Notification notification);
 }
