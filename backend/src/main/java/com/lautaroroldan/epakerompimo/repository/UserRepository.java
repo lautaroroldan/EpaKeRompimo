@@ -15,6 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u left join fetch u.email where u.idUser = :id")
     Optional<User> findWithEmailById(@Param("id") Long id);
-
+    Optional<User> findByEmail_UnlinkToken(String unlinkToken);
     Optional<User> findByEmail_VerificationToken(String verificationToken);
 }

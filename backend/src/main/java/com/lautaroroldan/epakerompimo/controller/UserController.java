@@ -93,4 +93,18 @@ public class UserController {
         checkOwner(id, authentication);
         userService.resendVerification(id);
     }
+    // Pide el mail de confirmación para desvincular el mail (solo el dueño)
+    @PostMapping("/{id}/email/unlink-request")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void requestEmailUnlink(@PathVariable Long id, Authentication authentication) {
+        checkOwner(id, authentication);
+        userService.requestEmailUnlink(id);
+    }
+
+    // Público: se llega desde el link del mail (Angular llama acá)
+    @PostMapping("/unlink-email")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void confirmEmailUnlink(@RequestParam String token) {
+        userService.confirmEmailUnlink(token);
+    }
 }

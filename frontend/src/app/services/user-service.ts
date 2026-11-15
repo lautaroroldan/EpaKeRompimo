@@ -31,4 +31,11 @@ export class UserService {
   resendVerification(id: number) {
     return this.http.post<void>(`${API_URL}/users/${id}/resend-verification`, null);
   }
+  requestEmailUnlink(id: number) {
+    return this.http.post<void>(`${API_URL}/users/${id}/email/unlink-request`, null);
+  }
+
+  unlinkEmail(token: string) {
+    return this.http.post<void>(`${API_URL}/users/unlink-email`, null, { params: { token } });
+  }
 }

@@ -182,18 +182,17 @@ public class UserServiceManager implements UserService {
         sendVerificationEmail(user);
     }
 
-    // Devuelve true si hay que mandar un mail de confirmación.
-    // El mail nuevo NO reemplaza al confirmado: queda como pendiente hasta que se confirme.
-    private boolean applyEmail(User user, String rawEmail) {
-        String address = (rawEmail == null || rawEmail.isBlank()) ? null : rawEmail.trim().toLowerCase();
-        UserEmail mail = user.getEmail();
 
-        if (address == null) {                                  // lo borró: se quita el confirmado y el pendiente
-            user.setEmail(null);                                // orphanRemoval borra la fila
-            return false;
+    private boolean applyEmail(User user, String rawEmail) {
+        UserEmail mail = user.getEmail();
+        if (mail != null && mail.getAddress() != null) {
+            return false;                                     // se ignora el campo
         }
-        if (mail != null && address.equals(mail.getAddress())) {          // volvió a su mail confirmado: cancela el pendiente
-            mail.clearPending();
+
+        String address = (rawEmail == null || rawEmail.isBlank()) ? null : rawEmail.trim().toLowerCase();
+
+        if (address == null) {                                // vació el campo: se descarta el pendiente
+            user.setEmail(null);
             return false;
         }
         if (mail != null && address.equals(mail.getPendingAddress())) {   // ya estaba pendiente: no se reenvía solo
@@ -231,5 +230,41 @@ public class UserServiceManager implements UserService {
                 "Confirmar mi mail", link,
                 NotificationMessage.LINK_EXPIRES_FOOTER,
                 Map.of());
+    }
+
+    @Override
+    @Transactional
+    public void requestEmailUnlink(Long id) {
+        User user = getOrThrow(id);
+        UserEmail mail = user.getEmail();
+        if (mail == null || mail.getAddress() == null) {
+            throw new EmailVerificationException("No tenés ningún mail confirmado para desvincular");
+        }
+
+        mail.issueUnlinkToken();
+        String link = frontendUrl + "/desvincular-email?token=" + mail.getUnlinkToken();
+
+        // Se manda al mail confirmado: quien lo recibe es quien puede aprobar la desvinculación
+        notificationService.send(
+                user,
+                mail.getAddress(),
+                NotificationType.EMAIL_UNLINK,
+                "Confirmá la desvinculación de tu mail",
+                List.of(NotificationMessage.UNLINK_EMAIL_INSTRUCTIONS),
+                "Desvincular mi mail", link,
+                NotificationMessage.LINK_EXPIRES_FOOTER,
+                Map.of());
+    }
+
+    @Override
+    @Transactional
+    public void confirmEmailUnlink(String token) {
+        User user = userRepository.findByEmail_UnlinkToken(token)
+                .filter(u -> u.getEmail().unlinkTokenIsValid())
+                .orElseThrow(() -> new EmailVerificationException(
+                        "El link de desvinculación no es válido o ya venció"));
+
+        // orphanRemoval borra la fila: se van el mail, cualquier pendiente y los tokens
+        user.setEmail(null);
     }
 }

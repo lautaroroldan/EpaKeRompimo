@@ -37,6 +37,11 @@ export const routes: Routes = [
     title: 'Confirmar mail | EpaKeRompimo',
     loadComponent: () => import('./pages/verify-email/verify-email').then((m) => m.VerifyEmail),
   },
+    {
+    path: 'desvincular-email',
+    title: 'Desvincular mail | EpaKeRompimo',
+    loadComponent: () => import('./pages/unlink-email/unlink-email').then((m) => m.UnlinkEmail),
+  },
 
   { path: '**', redirectTo: '' },
 ];

@@ -25,6 +25,9 @@ export const serverRoutes: ServerRoute[] = [
     path: 'verificar-email',
     renderMode: RenderMode.Client
   },
+  { 
+    path: 'desvincular-email', renderMode: RenderMode.Client 
+  },
   {
     path: '**',
     renderMode: RenderMode.Prerender

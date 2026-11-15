@@ -31,6 +31,13 @@ public class UserEmail {
 
     private Instant verificationTokenExpiry;
 
+    @Column(length = 64)
+    private String unlinkToken;
+
+    private Instant unlinkTokenExpiry;
+
+
+
     // Genera un token nuevo (vale 24 h) para confirmar el mail pendiente
     public void issueToken() {
         this.verificationToken = UUID.randomUUID().toString();
@@ -55,5 +62,18 @@ public class UserEmail {
         return pendingAddress != null
                 && verificationTokenExpiry != null
                 && verificationTokenExpiry.isAfter(Instant.now());
+    }
+    // Genera un token nuevo (vale 24 h) para confirmar la desvinculación. Reemplaza al anterior.
+    public void issueUnlinkToken() {
+        this.unlinkToken = UUID.randomUUID().toString();
+        this.unlinkTokenExpiry = Instant.now().plus(24, ChronoUnit.HOURS);
+    }
+
+    // ¿Hay un mail confirmado y el token de desvinculación todavía no venció?
+    public boolean unlinkTokenIsValid() {
+        return address != null
+                && unlinkToken != null
+                && unlinkTokenExpiry != null
+                && unlinkTokenExpiry.isAfter(Instant.now());
     }
 }

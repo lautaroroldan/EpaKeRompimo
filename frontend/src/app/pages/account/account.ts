@@ -54,6 +54,8 @@ export class Account {
   protected readonly pendingEmail = signal<string | null>(null);
   protected readonly resending = signal(false);
   protected readonly resendMessage = signal<string | null>(null);
+  protected readonly unlinking = signal(false);
+  protected readonly unlinkMessage = signal<string | null>(null);
 
   protected readonly confirmingDelete = signal(false);
   protected readonly deleting = signal(false);
@@ -69,7 +71,7 @@ export class Account {
     // Trae los datos actuales desde el backend (GET /api/users/{id})
     this.users.findById(current.id).subscribe({
       next: (user) => {
-        this.form.patchValue({ username: user.username, icon: user.icon ?? '', email: user.pendingEmail ?? user.email ?? '', });
+        this.form.patchValue({ username: user.username, icon: user.icon ?? '', email: user.pendingEmail ?? '', });
         this.confirmedEmail.set(user.email);
         this.pendingEmail.set(user.pendingEmail);
         this.auth.updateSession({ username: user.username, icon: user.icon });
@@ -99,7 +101,7 @@ export class Account {
     const request: UserUpdateRequest = {
       username: username.trim(),
       icon: icon.trim() || null,
-      email: email.trim() || null,
+      ...(this.confirmedEmail() ? {} : { email: email.trim() || null }),
       ...(password ? { password } : {}),
     };
 
@@ -114,7 +116,7 @@ export class Account {
         this.pendingEmail.set(user.pendingEmail);
         this.resendMessage.set(null);
         this.auth.updateSession({ username: user.username, icon: user.icon });
-        this.form.patchValue({ email: user.pendingEmail ?? user.email ?? '',
+        this.form.patchValue({ email: user.pendingEmail ?? '',
           password: '',
           confirmPassword: '',});
         this.form.markAsPristine();
@@ -150,6 +152,28 @@ export class Account {
     });
   }
   
+  protected requestUnlink() {
+    const current = this.session();
+    if (!current) return;
+
+    this.unlinking.set(true);
+    this.unlinkMessage.set(null);
+    this.error.set(null);
+
+    this.users.requestEmailUnlink(current.id).subscribe({
+      next: () => {
+        this.unlinkMessage.set(
+          'Te mandamos un mail de confirmación. El mail se desvincula cuando hagas clic en el link.',
+        );
+        this.unlinking.set(false);
+      },
+      error: (err) => {
+        this.error.set(errorMessage(err, 'No se pudo pedir la desvinculación.'));
+        this.unlinking.set(false);
+      },
+    });
+  }
+
   protected askDelete() {
     this.deleteError.set(null);
     this.confirmingDelete.set(true);

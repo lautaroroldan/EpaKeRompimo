@@ -24,4 +24,7 @@ public interface UserService {
     void verifyEmail(String token);
 
     void resendVerification(Long id);
+    void requestEmailUnlink(Long id);
+
+    void confirmEmailUnlink(String token);
 }

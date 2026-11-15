@@ -12,6 +12,8 @@ import com.lautaroroldan.epakerompimo.provider.info.IGDBCompanyResponse;
 import com.lautaroroldan.epakerompimo.repository.FavoriteEnterpriseRepository;
 import com.lautaroroldan.epakerompimo.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import com.lautaroroldan.epakerompimo.event.FavoriteEnterpriseAddedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -22,13 +24,16 @@ public class FavoriteEnterpriseServiceManager implements FavoriteEnterpriseServi
     private final FavoriteEnterpriseRepository favoriteEnterpriseRepository;
     private final UserRepository userRepository;
     private final IGDBCompanyClient igdbCompanyClient;
+    private final ApplicationEventPublisher eventPublisher;
 
     public FavoriteEnterpriseServiceManager(FavoriteEnterpriseRepository favoriteEnterpriseRepository,
                                             UserRepository userRepository,
-                                            IGDBCompanyClient igdbCompanyClient) {
+                                            IGDBCompanyClient igdbCompanyClient,
+                                            ApplicationEventPublisher eventPublisher) {
         this.favoriteEnterpriseRepository = favoriteEnterpriseRepository;
         this.userRepository = userRepository;
         this.igdbCompanyClient = igdbCompanyClient;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -58,8 +63,9 @@ public class FavoriteEnterpriseServiceManager implements FavoriteEnterpriseServi
         favorite.setIgdbCompanyId(request.igdbCompanyId());
         favorite.setName(company != null && company.name() != null ? company.name() : request.name().trim());
         favorite.setLogoUrl(company != null ? igdbCompanyClient.logoUrlOf(company) : null);
-
-        return toResponse(favoriteEnterpriseRepository.save(favorite));
+        FavoriteEnterprise saved = favoriteEnterpriseRepository.save(favorite);
+        eventPublisher.publishEvent(new FavoriteEnterpriseAddedEvent(idUser, saved.getName()));
+        return toResponse(saved);
     }
 
     @Override
