@@ -1,35 +1,50 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { GameDetail } from '../../interfaces/GameProfile';
 import { API_URL } from '../../config/api';
 import { PriceComparison } from '../../components/price-comparison/price-comparison';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { GameService } from '../../services/game-service';
 import { FavoriteButton } from '../../components/favorite-button/favorite-button';
 import { FavoriteEnterpriseButton } from '../../components/favorite-enterprise-button/favorite-enterprise-button';
+import { MatchReportDialog } from '../../components/match-report-dialog/match-report-dialog';
+import { AuthService } from '../../services/auth-service';
+import { MatchReportType } from '../../interfaces/MatchReport';
 
 @Component({
   selector: 'app-game-profile',
-  imports: [PriceComparison, RouterLink, FavoriteButton, FavoriteEnterpriseButton],
+  imports: [
+    PriceComparison,
+    RouterLink,
+    FavoriteButton,
+    FavoriteEnterpriseButton,
+    MatchReportDialog,
+  ],
   templateUrl: './game-profile.html',
   styleUrl: './game-profile.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameProfile {
   readonly title = input.required<string>();
 
   private readonly http = inject(HttpClient);
   private readonly gameService = inject(GameService);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
-  // Id del juego en ITAD (el de los favoritos). null mientras se busca o si ITAD no lo encuentra:
-  // en ese caso la estrella no se muestra, pero el resto de la página funciona igual.
   readonly itadGameId = signal<string | null>(null);
 
   readonly gameDetail = signal<GameDetail | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly activeScreenshot = signal(0);
+
+  protected readonly reportOpen = signal(false);
+  protected readonly reported = signal(false);
+  protected readonly descriptionType: MatchReportType = 'DESCRIPTION_MISMATCH';
+
   private static readonly screenshots = 3;
   private static readonly tags = 4;
 
@@ -45,6 +60,7 @@ export class GameProfile {
         tap(() => {
           this.loading.set(true);
           this.error.set(null);
+          this.reported.set(false);
         }),
         switchMap((title) =>
           this.http.get<GameDetail>(`${API_URL}/details?title=${encodeURIComponent(title)}`).pipe(
@@ -75,5 +91,14 @@ export class GameProfile {
         takeUntilDestroyed(),
       )
       .subscribe((itadGameId) => this.itadGameId.set(itadGameId));
+  }
+
+  // Reportar requiere sesión: sin cuenta se manda al login.
+  protected openReport() {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.reportOpen.set(true);
   }
 }
