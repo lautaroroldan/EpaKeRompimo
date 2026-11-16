@@ -2,6 +2,7 @@ package com.lautaroroldan.epakerompimo.security;
 
 import com.lautaroroldan.epakerompimo.exceptions.ForbiddenOperationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 public final class AuthUtils {
 
@@ -14,5 +15,11 @@ public final class AuthUtils {
             return id.longValue();
         }
         throw new ForbiddenOperationException("No se pudo identificar al usuario autenticado");
+    }
+
+    public static boolean isAdmin(Authentication authentication) {
+        return authentication != null && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_ADMIN"::equals);
     }
 }

@@ -1,3 +1,5 @@
+export type UserRole = 'USER' | 'ADMIN';
+
 // Lo que devuelve el backend (UserResponse)
 export interface UserResponse {
   id: number;
@@ -5,7 +7,9 @@ export interface UserResponse {
   icon: string | null;
   email: string | null;
   pendingEmail: string | null;
-    notificationsEnabled: boolean;
+  role: UserRole;
+  notificationsEnabled: boolean;
+
 }
 
 // POST /api/users/login
@@ -19,6 +23,7 @@ export interface LoginResponse {
   idUsuario: number;
   username: string;
   icon: string | null;
+  role: UserRole;
 }
 
 // POST /api/users
@@ -43,4 +48,5 @@ export interface Session {
   id: number;
   username: string;
   icon: string | null;
+  role: UserRole;
 }

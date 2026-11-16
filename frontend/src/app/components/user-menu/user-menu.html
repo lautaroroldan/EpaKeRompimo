@@ -19,6 +19,23 @@
 
         <div class="my-1 border-t border-border"></div>
 
+        @if (auth.isAdmin()) {
+        <a routerLink="/admin" (click)="closeMenu()"
+            class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1 1 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1Z" />
+                <path d="m9 12 2 2 4-4" />
+            </svg>
+            <span class="flex min-w-0 flex-col">
+                <span>Panel de administración</span>
+                <span class="text-xs text-muted-foreground">Reportes y matcheos</span>
+            </span>
+        </a>
+
+        <div class="my-1 border-t border-border"></div>
+        }
+
         <a routerLink="/favoritos" (click)="closeMenu()"
             class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
             <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

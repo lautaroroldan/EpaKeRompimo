@@ -37,7 +37,11 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public UserResponse findById(@PathVariable Long id) {
+    public UserResponse findById(@PathVariable Long id, Authentication authentication) {
+        // El perfil incluye el mail: solo su dueño o un administrador pueden verlo
+        if (!id.equals(AuthUtils.userId(authentication)) && !AuthUtils.isAdmin(authentication)) {
+            throw new ForbiddenOperationException("No podés ver el perfil de otro usuario");
+        }
         return userService.findById(id);
     }
 
@@ -60,7 +64,7 @@ public class UserController {
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest) {
         UserResponse user = userService.login(loginRequest);
-        return new LoginResponse(jwtService.generate(user), user.id(), user.username(), user.icon());
+        return new LoginResponse(jwtService.generate(user), user.id(), user.username(), user.icon(), user.role());
     }
 
     @GetMapping("/exists/{username}")

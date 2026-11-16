@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,8 +30,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             try {
                 Claims claims = jwtService.parse(header.substring(7));
+                // El rol viaja en el token; si el token es viejo y no lo trae,
+                // la cuenta se trata como usuario común.
+                String role = claims.get("role", String.class);
+                List<SimpleGrantedAuthority> authorities = role == null || role.isBlank()
+                        ? List.of()
+                        : List.of(new SimpleGrantedAuthority("ROLE_" + role));
                 var auth = new UsernamePasswordAuthenticationToken(
-                        claims.getSubject(), null, List.of());
+                        claims.getSubject(), null, authorities);
                 auth.setDetails(claims.get("id", Long.class));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (JwtException | IllegalArgumentException e) {

@@ -38,6 +38,10 @@ stateless JWT authentication.
 - List current deals with pagination.
 - Retrieve game details and metadata through IGDB.
 - User accounts with stateless JWT authentication.
+- Two roles: common users and a seeded administrator.
+- Users can report a wrong match (description or store link) right from the game page.
+- Admin panel to review those reports and pin the correct IGDB/ITAD game or store link;
+  the correction is stored and applied for every visitor.
 - Centralized, consistent JSON error responses (RFC 7807 `ProblemDetail`).
 - Request validation with clear `400 Bad Request` messages.
 - Interactive API documentation with Swagger UI.
@@ -203,6 +207,89 @@ Returns the same `GameWithPricesDTO` shape as `/api/games`.
 `POST /api/users`, `POST /api/users/login` and `GET /api/users/exists/{username}`
 are public. Every other endpoint requires a `Bearer` token.
 
+The user list (`GET /api/users`) is restricted to administrators.
+`GET /api/users/{id}` is only available to the account owner or an administrator,
+because the profile includes the email address.
+
+### Roles
+
+| Role | How it is assigned |
+|---|---|
+| `USER` | Every account created through `POST /api/users`. |
+| `ADMIN` | Only the account seeded on startup (`AdminSeeder`). There is no endpoint to change roles. |
+
+The role travels in the JWT as the `role` claim. Tokens issued before roles existed
+(or with an unknown value) are treated as `USER`. An admin account cannot be deleted,
+so the panel never becomes unreachable.
+
+### Match reports
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/reports` | Report a wrong match. Requires a session. |
+| `GET` | `/api/reports/mine` | List your own reports with their status. |
+
+```json
+{
+  "type": "STORE_LINK_MISMATCH",
+  "gameTitle": "Elden Ring",
+  "igdbGameId": 119133,
+  "itadGameId": "018d937f-...",
+  "storeName": "Steam",
+  "currentUrl": "https://store.steampowered.com/...",
+  "message": "El link lleva a la edición de PS4"
+}
+```
+
+`type` is `DESCRIPTION_MISMATCH` (the description/metadata is not the game) or
+`STORE_LINK_MISMATCH` (the “go to store” link is wrong; `storeName` is required).
+Reports start as `PENDING`.
+
+### Admin panel
+
+All routes require the `ADMIN` role.
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/admin/reports?status=&type=` | Reports filtered by status and/or type. |
+| `GET` | `/api/admin/reports/{id}` | Report detail. |
+| `PATCH` | `/api/admin/reports/{id}` | Resolve or reject, saving the chosen fixes. |
+| `GET` | `/api/admin/candidates/igdb?title=` | IGDB candidates for the title. |
+| `GET` | `/api/admin/candidates/itad?title=` | ITAD candidates for the title. |
+| `GET` | `/api/admin/candidates/itad/{id}/prices?country=` | Real offers of a candidate. |
+| `GET` | `/api/admin/overrides?title=` | Current corrections for a title. |
+| `DELETE` | `/api/admin/overrides?title=` | Remove the corrections for a title. |
+
+Resolution body:
+
+```json
+{
+  "status": "RESOLVED",
+  "adminNote": "Era la entrega original, no la secuela",
+  "igdbGameId": 119133,
+  "itadGameId": "018d937f-...",
+  "storeName": "Steam",
+  "storeUrl": "https://store.steampowered.com/app/1245620",
+  "hideOffer": false
+}
+```
+
+`status` only accepts `RESOLVED` or `REJECTED`. When resolving, any supplied
+`igdbGameId` / `itadGameId` and store link are persisted as manual corrections.
+
+#### How the manual correction works
+
+Corrections are keyed by the **normalized profile title** (the same normalization
+used by the automatic matcher: accents, case and punctuation ignored):
+
+- `game_match_overrides` stores the correct `igdbGameId` and/or `itadGameId`.
+  The detail and price services check it **before** the automatic match, so fixing
+  “elden ring” once fixes the description and the price comparison for everyone.
+  If the pinned IGDB id no longer exists, the service falls back to the automatic match.
+- `store_link_overrides` stores a corrected URL (or hides the offer) per title + store.
+
+Both tables are managed exclusively through the admin endpoints.
+
 ### Errors
 
 Errors follow RFC 7807 (`ProblemDetail`):
@@ -290,6 +377,8 @@ The API will be available at <http://localhost:8080>.
 | `IGDB_CLIENT_ID` | Twitch application Client ID. **Required** for the details endpoint. | *(empty)* |
 | `IGDB_CLIENT_SECRET` | Twitch application Client Secret. **Required** for the details endpoint. | *(empty)* |
 | `JWT_SECRET` | Base64 secret (>= 32 bytes) used to sign JWTs. | dev-only default |
+| `ADMIN_USERNAME` | Username of the administrator seeded on startup. | `admin` |
+| `ADMIN_PASSWORD` | Password for that administrator. **Change it in production.** | `admin1234` |
 | `DB_URL` | JDBC URL. | `jdbc:h2:file:./data/epakerompimo;MODE=MySQL` |
 | `DB_USERNAME` | Database user. | `sa` |
 | `DB_PASSWORD` | Database password. | *(empty)* |
@@ -304,19 +393,27 @@ IGDB has no API key: the backend exchanges `IGDB_CLIENT_ID` +
 is close to expiry, so no manual refresh is needed. Keep in mind IGDB allows
 **4 requests per second** per application.
 
+On startup, `AdminSeeder` creates the administrator account if it does not exist.
+It uses `ADMIN_USERNAME` / `ADMIN_PASSWORD` (defaults: `admin` / `admin1234`).
+If that username already belongs to a common account, it is **not** promoted: the
+seeder logs a warning and leaves it alone. Registration always creates a `USER`.
+
 ## Project structure
 
 ```
 backend/src/main/java/com/lautaroroldan/epakerompimo
 ├── EpaKeRompimoApplication.java
 ├── config/                 # beans, security and CORS wiring
+│   ├── AdminSeeder.java    # creates the administrator account on startup
 │   ├── ApiClientConfig.java
 │   ├── CorsConfig.java
 │   └── SecurityConfig.java
 ├── controller/             # HTTP endpoints
+│   ├── AdminController.java
 │   ├── DealController.java
 │   ├── DetailController.java
 │   ├── GameController.java
+│   ├── MatchReportController.java
 │   ├── StoreController.java
 │   └── UserController.java
 ├── client/                 # shared RestClient helper
@@ -328,13 +425,16 @@ backend/src/main/java/com/lautaroroldan/epakerompimo
 ├── service/                # business logic
 │   ├── GameCatalogService.java
 │   ├── GameDetailService.java
+│   ├── GameMatchOverrideServiceManager.java
 │   ├── GameSearchService.java
 │   ├── GameSearchServiceManager.java
+│   ├── MatchReportServiceManager.java
 │   ├── PriceAggregationService.java
 │   ├── UserService.java
 │   └── UserServiceManager.java
 ├── dto/                    # request/response models
 ├── entity/                 # JPA entities
+├── enums/                  # Role, report types and statuses
 ├── repository/             # Spring Data repositories
 ├── security/               # JWT filter and helpers
 └── exceptions/             # error handling

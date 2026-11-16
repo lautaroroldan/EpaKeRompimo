@@ -1,18 +1,26 @@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HlmInputImports } from '@spartan-ng/helm/input';
+import { MatchReport } from '../../interfaces/MatchReport';
 import { UserUpdateRequest } from '../../interfaces/User';
 import { UserAvatar } from '../../components/user-avatar/user-avatar';
 import { AuthService } from '../../services/auth-service';
+import { ReportService } from '../../services/report-service';
 import { UserService } from '../../services/user-service';
 import { errorMessage } from '../../utils/http-error';
+import {
+  reportDate,
+  reportStatusClasses,
+  reportStatusLabel,
+  reportTypeLabel,
+} from '../../utils/reports';
 import { passwordsMatch, usernameAvailable } from '../../validators/user-validators';
 
 @Component({
   selector: 'app-account',
-  imports: [ReactiveFormsModule, HlmInputImports, UserAvatar],
+  imports: [ReactiveFormsModule, HlmInputImports, UserAvatar, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './account.html',
 })
@@ -20,6 +28,7 @@ export class Account {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly auth = inject(AuthService);
   private readonly users = inject(UserService);
+  private readonly reportsService = inject(ReportService);
   private readonly router = inject(Router);
 
   protected readonly session = this.auth.session;
@@ -61,12 +70,23 @@ export class Account {
   protected readonly deleting = signal(false);
   protected readonly deleteError = signal<string | null>(null);
 
+  // Reportes de matcheo que envió este usuario
+  protected readonly reports = signal<MatchReport[]>([]);
+  protected readonly reportsLoading = signal(true);
+  protected readonly reportsError = signal<string | null>(null);
+  protected readonly typeLabel = reportTypeLabel;
+  protected readonly statusLabel = reportStatusLabel;
+  protected readonly statusClasses = reportStatusClasses;
+  protected readonly formatDate = reportDate;
+
   constructor() {
     const current = this.session();
     if (!current) {
       this.router.navigate(['/login']);
       return;
     }
+
+    this.loadReports();
 
     // Trae los datos actuales desde el backend (GET /api/users/{id})
     this.users.findById(current.id).subscribe({
@@ -198,6 +218,19 @@ export class Account {
       error: (err) => {
         this.deleteError.set(errorMessage(err, 'No se pudo eliminar la cuenta.'));
         this.deleting.set(false);
+      },
+    });
+  }
+
+  private loadReports() {
+    this.reportsService.findMine().subscribe({
+      next: (reports) => {
+        this.reports.set(reports);
+        this.reportsLoading.set(false);
+      },
+      error: (err) => {
+        this.reportsError.set(errorMessage(err, 'No se pudieron cargar tus reportes.'));
+        this.reportsLoading.set(false);
       },
     });
   }

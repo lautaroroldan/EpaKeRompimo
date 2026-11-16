@@ -9,6 +9,7 @@ import {
   Session,
   UserRequest,
   UserResponse,
+  UserRole,
 } from '../interfaces/User';
 
 const STORAGE_KEY = 'epakerompimo.session';
@@ -25,6 +26,9 @@ export class AuthService {
   readonly session = this._session.asReadonly();
   readonly isLoggedIn = computed(() => this._session() !== null);
   readonly token = computed(() => this._session()?.token ?? null);
+  // El backend es el que manda: el rol se usa solo para mostrar entradas de menú
+  readonly role = computed<UserRole>(() => this._session()?.role ?? 'USER');
+  readonly isAdmin = computed(() => this.role() === 'ADMIN');
 
   constructor() {
     if (this.isBrowser) {
@@ -40,6 +44,7 @@ export class AuthService {
           id: res.idUsuario,
           username: res.username,
           icon: res.icon,
+          role: res.role ?? 'USER',
         }),
       ),
     );
@@ -85,7 +90,8 @@ export class AuthService {
         this.removeStorage();
         return null;
       }
-      return s;
+      // Sesiones guardadas antes de los roles no traen el campo: se asumen comunes
+      return { ...s, role: s.role === 'ADMIN' ? 'ADMIN' : 'USER' };
     } catch {
       return null;
     }

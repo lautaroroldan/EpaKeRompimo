@@ -1,6 +1,7 @@
 package com.lautaroroldan.epakerompimo.service;
 
 import com.lautaroroldan.epakerompimo.dto.game.GameDetailDTO;
+import com.lautaroroldan.epakerompimo.entity.GameMatchOverride;
 import com.lautaroroldan.epakerompimo.provider.info.GameInfoProvider;
 import org.springframework.stereotype.Service;
 
@@ -9,12 +10,21 @@ import java.util.List;
 @Service
 public class GameDetailService {
     private final GameInfoProvider gameInfoProvider;
+    private final GameMatchOverrideService matchOverrideService;
 
-    public GameDetailService(GameInfoProvider gameInfoProvider) {
+    public GameDetailService(GameInfoProvider gameInfoProvider,
+                             GameMatchOverrideService matchOverrideService) {
         this.gameInfoProvider = gameInfoProvider;
+        this.matchOverrideService = matchOverrideService;
     }
 
     public GameDetailDTO findByTitle(String title) {
+        // Si el administrador fijó el juego correcto, manda esa decisión.
+        GameDetailDTO fixed = findByOverride(title);
+        if (fixed != null) {
+            return fixed;
+        }
+
         List<GameDetailDTO> candidates = gameInfoProvider.searchGame(title);
         GameDetailDTO candidate = preferExactTitle(candidates, title);
         if (candidate == null) {
@@ -24,6 +34,23 @@ public class GameDetailService {
         // profile view resolves the match first and then fetches the full detail.
         GameDetailDTO detail = gameInfoProvider.findGameById(String.valueOf(candidate.externalId()));
         return detail != null ? detail : candidate;
+    }
+
+    /** Todos los candidatos de IGDB para que el admin elija el correcto. */
+    public List<GameDetailDTO> searchCandidates(String title) {
+        return gameInfoProvider.searchGame(title);
+    }
+
+    /**
+     * El id fijado puede haber desaparecido de IGDB; en ese caso se vuelve al
+     * matcheo automático en lugar de romper la vista.
+     */
+    private GameDetailDTO findByOverride(String title) {
+        GameMatchOverride override = matchOverrideService.findGameOverride(title).orElse(null);
+        if (override == null || override.getIgdbGameId() == null) {
+            return null;
+        }
+        return gameInfoProvider.findGameById(String.valueOf(override.getIgdbGameId()));
     }
 
     /**

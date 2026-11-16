@@ -1,5 +1,6 @@
 package com.lautaroroldan.epakerompimo.entity;
 
+import com.lautaroroldan.epakerompimo.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +19,11 @@ public class User {
     @Column(nullable = false, length = 60)
     private String password;
     private String icon;
+    // Queda nullable a propósito: las filas que ya existían cuando se agregó la
+    // columna no tienen rol y se leen como USER (ver roleOrDefault()).
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Role role = Role.USER;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "email_id")
     private UserEmail email;
@@ -32,5 +38,17 @@ public class User {
         this.username = username;
         this.password = password;
         this.icon = icon;
+    }
+
+    /**
+     * Nunca devuelve null: las cuentas anteriores a la columna {@code role} se
+     * consideran usuarios comunes.
+     */
+    public Role roleOrDefault() {
+        return role != null ? role : Role.USER;
+    }
+
+    public boolean isAdmin() {
+        return roleOrDefault() == Role.ADMIN;
     }
 }

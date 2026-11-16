@@ -66,10 +66,20 @@
                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                         </svg>
                     </a>
+                    <button type="button" (click)="openReport(offer)"
+                        class="mt-1 block w-full cursor-pointer text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+                        Reportar link
+                    </button>
                 </td>
             </tr>
             }
         </tbody>
     </table>
+
+    @if (reportOffer(); as offer) {
+    <app-match-report-dialog [type]="storeLinkType" [gameTitle]="title()" [storeName]="offer.store.name"
+        [currentUrl]="offer.store.urlStore" [itadGameId]="itadGameId()" [igdbGameId]="igdbGameId()"
+        (closed)="closeReport()" />
+    }
 </section>
 }

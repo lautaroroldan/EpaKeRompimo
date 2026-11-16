@@ -1,6 +1,7 @@
 package com.lautaroroldan.epakerompimo.security;
 
 import com.lautaroroldan.epakerompimo.dto.user.UserResponse;
+import com.lautaroroldan.epakerompimo.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -23,9 +24,11 @@ public class JwtService {
     }
 
     public String generate(UserResponse user) {
+        Role role = user.role() != null ? user.role() : Role.USER;
         return Jwts.builder()
                 .subject(user.username())
                 .claim("id", user.id())
+                .claim("role", role.name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2)) // 2 horas
                 .signWith(key())
