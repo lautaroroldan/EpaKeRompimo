@@ -19,7 +19,6 @@ import { MatchReportType } from '../../interfaces/MatchReport';
     PriceComparison,
     RouterLink,
     FavoriteButton,
-    FavoriteEnterpriseButton,
     MatchReportDialog,
   ],
   templateUrl: './game-profile.html',
