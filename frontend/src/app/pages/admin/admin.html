@@ -1,0 +1,333 @@
+<section class="mx-auto w-full max-w-6xl p-4 sm:p-6">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold">Panel de administración</h1>
+            <p class="mt-0.5 max-w-2xl text-sm text-muted-foreground">
+                Revisá los reportes de los usuarios y fijá el juego o el link correcto. La corrección
+                queda guardada y se aplica a todos los que abran esa ficha.
+            </p>
+        </div>
+        <p class="text-sm text-muted-foreground">
+            {{ admin.reports().length }} {{ admin.reports().length === 1 ? 'reporte' : 'reportes' }}
+        </p>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-4">
+        <label class="flex items-center gap-2 text-sm">
+            <span class="text-muted-foreground">Estado</span>
+            <select class="h-8 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                (change)="onStatusFilter($any($event.target).value)">
+                <option value="">Todos</option>
+                <option value="PENDING">Pendientes</option>
+                <option value="RESOLVED">Resueltos</option>
+                <option value="REJECTED">Rechazados</option>
+            </select>
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+            <span class="text-muted-foreground">Tipo</span>
+            <select class="h-8 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                (change)="onTypeFilter($any($event.target).value)">
+                <option value="">Todos</option>
+                <option value="DESCRIPTION_MISMATCH">Descripción</option>
+                <option value="STORE_LINK_MISMATCH">Link de tienda</option>
+            </select>
+        </label>
+    </div>
+
+    @if (feedback(); as message) {
+    <p class="mt-4 rounded-lg border border-border bg-accent/50 p-3 text-sm" role="status">{{ message }}</p>
+    }
+    @if (admin.error(); as message) {
+    <p class="mt-4 text-sm text-destructive" role="alert">{{ message }}</p>
+    }
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:items-start">
+        <!-- ===== Lista de reportes ===== -->
+        <section aria-label="Reportes" class="min-w-0">
+            @if (admin.loading()) {
+            <p class="text-sm text-muted-foreground">Cargando reportes…</p>
+            } @else if (!admin.reports().length) {
+            <p class="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+                No hay reportes con estos filtros.
+            </p>
+            } @else {
+            <ul class="flex flex-col gap-2">
+                @for (report of admin.reports(); track report.id) {
+                <li>
+                    <button type="button" (click)="open(report)"
+                        [attr.aria-current]="admin.selected()?.id === report.id"
+                        class="w-full cursor-pointer rounded-xl border border-border p-3 text-left transition-colors hover:bg-accent"
+                        [class.border-primary]="admin.selected()?.id === report.id">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span [class]="typeClasses()">{{ typeLabel(report.type) }}</span>
+                            <span [class]="statusClasses(report.status)">{{ statusLabel(report.status) }}</span>
+                            <span class="ml-auto text-xs text-muted-foreground">{{ formatDate(report.createdAt) }}</span>
+                        </div>
+                        <p class="mt-2 truncate font-medium">{{ report.gameTitle }}</p>
+                        <p class="text-xs text-muted-foreground">
+                            {{ report.username }}
+                            @if (report.storeName) {
+                            <span> · {{ report.storeName }}</span>
+                            }
+                        </p>
+                    </button>
+                </li>
+                }
+            </ul>
+            }
+        </section>
+
+        <!-- ===== Detalle y corrección ===== -->
+        <section aria-label="Detalle del reporte" class="min-w-0">
+            @if (admin.selected(); as report) {
+            <div class="rounded-xl border border-border bg-card p-4 sm:p-5">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <h2 class="text-lg font-semibold">{{ report.gameTitle }}</h2>
+                        <p class="text-xs text-muted-foreground">
+                            #{{ report.id }} · {{ report.username }} · {{ formatDate(report.createdAt) }}
+                        </p>
+                    </div>
+                    <a [routerLink]="['/game', report.gameTitle]" target="_blank"
+                        class="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">
+                        Ver ficha
+                    </a>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-2">
+                    <span [class]="typeClasses()">{{ typeLabel(report.type) }}</span>
+                    <span [class]="statusClasses(report.status)">{{ statusLabel(report.status) }}</span>
+                </div>
+
+                @if (report.message; as message) {
+                <blockquote class="mt-4 rounded-r-lg border-l-2 border-border pl-3 text-sm text-muted-foreground">
+                    {{ message }}
+                </blockquote>
+                }
+
+                <dl class="mt-4 grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <dt class="text-muted-foreground">IGDB mostrado</dt>
+                        <dd>{{ report.igdbGameId ?? '—' }}</dd>
+                    </div>
+                    <div class="min-w-0">
+                        <dt class="text-muted-foreground">ITAD mostrado</dt>
+                        <dd class="break-all">{{ report.itadGameId ?? '—' }}</dd>
+                    </div>
+                    @if (report.currentUrl; as url) {
+                    <div class="col-span-2 min-w-0">
+                        <dt class="text-muted-foreground">Link reportado</dt>
+                        <dd class="break-all">
+                            <a [href]="url" target="_blank" rel="noopener noreferrer"
+                                class="underline underline-offset-4 hover:text-foreground">{{ url }}</a>
+                        </dd>
+                    </div>
+                    }
+                </dl>
+
+                <!-- Corrección vigente -->
+                <div class="mt-5 rounded-lg border border-border p-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <h3 class="text-sm font-medium">Corrección vigente</h3>
+                        @if (admin.loadingOverride()) {
+                        <span class="text-xs text-muted-foreground">Cargando…</span>
+                        }
+                    </div>
+                    @if (admin.override(); as fix) {
+                    @if (fix.igdbGameId || fix.itadGameId || fix.storeLinks.length) {
+                    <ul class="mt-2 space-y-1 text-xs">
+                        @if (fix.igdbGameId) {
+                        <li>IGDB fijado: {{ fix.igdbGameId }}</li>
+                        }
+                        @if (fix.itadGameId) {
+                        <li class="break-all">ITAD fijado: {{ fix.itadGameId }}</li>
+                        }
+                        @for (link of fix.storeLinks; track link.storeName) {
+                        <li class="break-all">
+                            {{ link.storeName }}:
+                            @if (link.hidden) {
+                            <span class="text-muted-foreground">oferta oculta</span>
+                            } @else if (link.url) {
+                            <a [href]="link.url" target="_blank" rel="noopener noreferrer"
+                                class="underline underline-offset-4 hover:text-foreground">{{ link.url }}</a>
+                            }
+                        </li>
+                        }
+                    </ul>
+                    <button type="button" (click)="clearOverride()" [disabled]="saving()"
+                        class="mt-2 cursor-pointer text-xs text-destructive underline underline-offset-4 disabled:opacity-50">
+                        Quitar esta corrección
+                    </button>
+                    } @else {
+                    <p class="mt-1 text-xs text-muted-foreground">
+                        Sin correcciones: se está usando el matcheo automático.
+                    </p>
+                    }
+                    }
+                </div>
+
+                <!-- 1. IGDB -->
+                <div class="mt-5">
+                    <h3 class="text-sm font-medium">1. Elegí el juego correcto en IGDB</h3>
+                    <p class="text-xs text-muted-foreground">Arregla la descripción, portada, fecha y empresas.</p>
+                    <div class="mt-2 flex gap-2">
+                        <input [value]="igdbQuery()" (input)="igdbQuery.set($any($event.target).value)"
+                            (keyup.enter)="searchIgdb()" placeholder="Título en IGDB" aria-label="Título en IGDB"
+                            class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50" />
+                        <button type="button" (click)="searchIgdb()" [disabled]="admin.searching()"
+                            class="inline-flex h-8 shrink-0 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent disabled:opacity-50">
+                            Buscar
+                        </button>
+                    </div>
+
+                    @if (admin.igdbCandidates().length) {
+                    <ul class="mt-2 grid gap-2 sm:grid-cols-2">
+                        @for (game of admin.igdbCandidates(); track game.externalId) {
+                        <li>
+                            <button type="button" (click)="pickIgdb(game)"
+                                class="flex w-full cursor-pointer items-start gap-2 rounded-lg border border-border p-2 text-left transition-colors hover:bg-accent"
+                                [class.ring-2]="selectedIgdb()?.externalId === game.externalId"
+                                [class.ring-primary]="selectedIgdb()?.externalId === game.externalId">
+                                <img [src]="game.coverImageUrl" alt="" loading="lazy"
+                                    class="h-16 w-12 shrink-0 rounded object-cover" />
+                                <span class="min-w-0">
+                                    <span class="block truncate text-sm font-medium">{{ game.title }}</span>
+                                    <span class="block text-xs text-muted-foreground">
+                                        {{ game.released || 'sin fecha' }} · ID {{ game.externalId }}
+                                    </span>
+                                    <span class="block truncate text-[11px] text-muted-foreground">
+                                        {{ game.platforms.join(', ') }}
+                                    </span>
+                                </span>
+                            </button>
+                        </li>
+                        }
+                    </ul>
+                    }
+
+                    @if (selectedIgdb(); as game) {
+                    <p class="mt-2 rounded-lg bg-accent/60 px-3 py-2 text-xs">
+                        IGDB elegido: <strong>{{ game.title }}</strong> ({{ game.externalId }})
+                    </p>
+                    }
+                </div>
+
+                <!-- 2. ITAD -->
+                <div class="mt-5">
+                    <h3 class="text-sm font-medium">2. Elegí el juego correcto en ITAD</h3>
+                    <p class="text-xs text-muted-foreground">Arregla qué juego se compara en precios.</p>
+                    <div class="mt-2 flex gap-2">
+                        <input [value]="itadQuery()" (input)="itadQuery.set($any($event.target).value)"
+                            (keyup.enter)="searchItad()" placeholder="Título en ITAD" aria-label="Título en ITAD"
+                            class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50" />
+                        <button type="button" (click)="searchItad()" [disabled]="admin.searching()"
+                            class="inline-flex h-8 shrink-0 items-center rounded-lg border border-input px-3 text-sm hover:bg-accent disabled:opacity-50">
+                            Buscar
+                        </button>
+                    </div>
+
+                    @if (admin.itadCandidates().length) {
+                    <ul class="mt-2 flex flex-col gap-1">
+                        @for (game of admin.itadCandidates(); track game.id) {
+                        <li>
+                            <button type="button" (click)="pickItad(game)"
+                                class="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-border p-2 text-left transition-colors hover:bg-accent"
+                                [class.ring-2]="selectedItad()?.id === game.id"
+                                [class.ring-primary]="selectedItad()?.id === game.id">
+                                <span class="min-w-0">
+                                    <span class="block truncate text-sm font-medium">{{ game.title }}</span>
+                                    <span class="block truncate text-[11px] text-muted-foreground">
+                                        {{ game.type }} · {{ game.id }}
+                                    </span>
+                                </span>
+                            </button>
+                        </li>
+                        }
+                    </ul>
+                    }
+
+                    @if (selectedItad(); as game) {
+                    <p class="mt-2 rounded-lg bg-accent/60 px-3 py-2 text-xs">
+                        ITAD elegido: <strong>{{ game.title }}</strong>
+                    </p>
+
+                    @if (admin.itadPrices().length) {
+                    <ul class="mt-2 flex flex-col gap-1 text-xs">
+                        @for (price of admin.itadPrices(); track $index) {
+                        <li class="flex items-center justify-between gap-2 rounded border border-border px-2 py-1">
+                            <span class="min-w-0">
+                                <span class="block truncate font-medium">{{ price.store.name }}</span>
+                                <a [href]="price.store.urlStore" target="_blank" rel="noopener noreferrer"
+                                    class="block truncate text-muted-foreground underline underline-offset-4 hover:text-foreground">
+                                    {{ price.store.urlStore }}
+                                </a>
+                            </span>
+                            <span class="shrink-0">{{ formatPrice(price.salePrice, price.currency) }}</span>
+                        </li>
+                        }
+                    </ul>
+                    } @else {
+                    <p class="mt-2 text-xs text-muted-foreground">Ese juego no tiene precios para mostrar.</p>
+                    }
+                    }
+                </div>
+
+                <!-- 3. Link de tienda -->
+                <div class="mt-5">
+                    <h3 class="text-sm font-medium">3. Corregí el link de la tienda</h3>
+                    <p class="text-xs text-muted-foreground">
+                        Pegá la URL correcta o marcá la oferta como oculta. Solo aplica a este juego.
+                    </p>
+                    <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                        <label class="flex flex-col gap-1 text-xs">
+                            <span class="text-muted-foreground">Tienda</span>
+                            <input [value]="storeName()" (input)="storeName.set($any($event.target).value)"
+                                placeholder="Steam"
+                                class="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50" />
+                        </label>
+                        <label class="flex flex-col gap-1 text-xs">
+                            <span class="text-muted-foreground">URL correcta</span>
+                            <input [value]="storeUrl()" (input)="storeUrl.set($any($event.target).value)"
+                                placeholder="https://…" type="url"
+                                class="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50" />
+                        </label>
+                    </div>
+                    <label class="mt-2 flex items-center gap-2 text-sm">
+                        <input type="checkbox" [checked]="hideOffer()"
+                            (change)="hideOffer.set($any($event.target).checked)" class="size-4" />
+                        Ocultar esta oferta del comparador
+                    </label>
+                </div>
+
+                <!-- Nota y acciones -->
+                <div class="mt-5">
+                    <label for="admin-note" class="text-sm font-medium">Nota interna</label>
+                    <textarea id="admin-note" rows="3" [value]="note()"
+                        (input)="note.set($any($event.target).value)"
+                        placeholder="Qué estaba mal y qué se corrigió (opcional)"
+                        class="mt-1 w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"></textarea>
+                </div>
+
+                @if (actionError(); as message) {
+                <p class="mt-2 text-sm text-destructive" role="alert">{{ message }}</p>
+                }
+
+                <div class="mt-4 flex flex-wrap justify-end gap-2">
+                    <button type="button" (click)="reject()" [disabled]="saving()"
+                        class="inline-flex h-9 items-center rounded-lg border border-input px-4 text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50">
+                        Rechazar
+                    </button>
+                    <button type="button" (click)="resolve()" [disabled]="saving()"
+                        class="inline-flex h-9 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+                        {{ saving() ? 'Guardando…' : 'Guardar y resolver' }}
+                    </button>
+                </div>
+            </div>
+            } @else {
+            <p class="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+                Elegí un reporte de la lista para revisarlo.
+            </p>
+            }
+        </section>
+    </div>
+</section>

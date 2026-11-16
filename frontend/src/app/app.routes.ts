@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './guards/auth-guard';
+import { adminGuard, authGuard, guestGuard } from './guards/auth-guard';
 import { Home } from './pages/home/home';
 import { GameProfile } from './pages/game-profile/game-profile';
 import { CompanyProfile } from './pages/company/company';
@@ -41,6 +41,12 @@ export const routes: Routes = [
     path: 'desvincular-email',
     title: 'Desvincular mail | EpaKeRompimo',
     loadComponent: () => import('./pages/unlink-email/unlink-email').then((m) => m.UnlinkEmail),
+  },
+  {
+    path: 'admin',
+    title: 'Panel de administración | EpaKeRompimo',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./pages/admin/admin').then((m) => m.Admin),
   },
 
   { path: '**', redirectTo: '' },
