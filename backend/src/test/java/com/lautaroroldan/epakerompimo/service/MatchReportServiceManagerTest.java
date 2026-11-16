@@ -3,6 +3,7 @@ package com.lautaroroldan.epakerompimo.service;
 import com.lautaroroldan.epakerompimo.dto.report.MatchReportRequest;
 import com.lautaroroldan.epakerompimo.dto.report.MatchReportResolveRequest;
 import com.lautaroroldan.epakerompimo.dto.report.MatchReportResponse;
+import com.lautaroroldan.epakerompimo.entity.GameMatchOverride;
 import com.lautaroroldan.epakerompimo.entity.MatchReport;
 import com.lautaroroldan.epakerompimo.entity.User;
 import com.lautaroroldan.epakerompimo.enums.MatchReportStatus;
@@ -83,6 +84,23 @@ class MatchReportServiceManagerTest {
         assertThat(response.adminNote()).isEqualTo("era Nightreign");
         assertThat(response.resolvedBy()).isEqualTo("admin");
         assertThat(response.resolvedAt()).isNotNull();
+    }
+
+    @Test
+    void keepsTheAlreadyPinnedProviderWhenOnlyOneIsChanged() {
+        MatchReport report = pendingReport();
+        when(matchReportRepository.findById(1L)).thenReturn(Optional.of(report));
+        when(userRepository.findById(9L)).thenReturn(Optional.of(user(9L, "admin")));
+
+        GameMatchOverride existing = new GameMatchOverride();
+        existing.setIgdbGameId(42L);
+        existing.setItadGameId("itad-viejo");
+        when(matchOverrideService.findGameOverride("Elden Ring")).thenReturn(Optional.of(existing));
+
+        service.resolve(1L, new MatchReportResolveRequest(MatchReportStatus.RESOLVED, null,
+                null, "itad-nuevo", null, null, null), 9L);
+
+        verify(matchOverrideService).saveGameOverride("Elden Ring", 42L, "itad-nuevo", 9L);
     }
 
     @Test

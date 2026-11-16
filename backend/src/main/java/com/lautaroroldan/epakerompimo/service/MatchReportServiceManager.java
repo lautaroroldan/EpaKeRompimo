@@ -3,6 +3,7 @@ package com.lautaroroldan.epakerompimo.service;
 import com.lautaroroldan.epakerompimo.dto.report.MatchReportRequest;
 import com.lautaroroldan.epakerompimo.dto.report.MatchReportResolveRequest;
 import com.lautaroroldan.epakerompimo.dto.report.MatchReportResponse;
+import com.lautaroroldan.epakerompimo.entity.GameMatchOverride;
 import com.lautaroroldan.epakerompimo.entity.MatchReport;
 import com.lautaroroldan.epakerompimo.entity.User;
 import com.lautaroroldan.epakerompimo.enums.MatchReportStatus;
@@ -112,14 +113,22 @@ public class MatchReportServiceManager implements MatchReportService {
 
     /**
      * Guarda las correcciones permanentes. Solo se escribe lo que el admin
-     * eligió: el panel manda los ids únicamente cuando cambió el match.
+     * eligió: el panel manda los ids únicamente cuando cambió el match, y lo
+     * que ya estaba fijado se conserva.
      */
     private void applyFixes(MatchReport report, MatchReportResolveRequest request, Long adminUserId) {
         boolean fixGame = request.igdbGameId() != null
                 || (request.itadGameId() != null && !request.itadGameId().isBlank());
         if (fixGame) {
-            matchOverrideService.saveGameOverride(report.getGameTitle(),
-                    request.igdbGameId(), request.itadGameId(), adminUserId);
+            GameMatchOverride current = matchOverrideService.findGameOverride(report.getGameTitle())
+                    .orElse(null);
+            Long igdbGameId = request.igdbGameId() != null
+                    ? request.igdbGameId()
+                    : (current != null ? current.getIgdbGameId() : null);
+            String itadGameId = request.itadGameId() != null && !request.itadGameId().isBlank()
+                    ? request.itadGameId().trim()
+                    : (current != null ? current.getItadGameId() : null);
+            matchOverrideService.saveGameOverride(report.getGameTitle(), igdbGameId, itadGameId, adminUserId);
         }
 
         boolean fixStore = request.storeName() != null && !request.storeName().isBlank()
