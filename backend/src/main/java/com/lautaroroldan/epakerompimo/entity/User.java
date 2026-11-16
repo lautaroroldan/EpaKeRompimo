@@ -21,6 +21,8 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "email_id")
     private UserEmail email;
+    @Column(name = "notifications_enabled", nullable = false, columnDefinition = "boolean default true")
+    private boolean notificationsEnabled = true;
 
     public User() {
     }

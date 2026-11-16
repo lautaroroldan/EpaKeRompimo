@@ -7,6 +7,7 @@ import com.lautaroroldan.epakerompimo.entity.User;
 import com.lautaroroldan.epakerompimo.event.NotificationCreatedEvent;
 import com.lautaroroldan.epakerompimo.repository.NotificationRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,9 @@ import java.util.Map;
 public class NotificationServiceManager implements NotificationService {
 
     private static final String HEADING = "Hola {username}";
+
+    // Se mandan siempre, aunque el usuario haya desactivado las notificaciones:
+    private static final Set<NotificationType> ESSENTIAL_TYPES = Set.of(NotificationType.EMAIL_VERIFICATION, NotificationType.EMAIL_UNLINK);
 
     private final NotificationRepository notificationRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -32,7 +36,11 @@ public class NotificationServiceManager implements NotificationService {
     @Transactional
     public void send(User user, String recipient, NotificationType type, String subject,
                      List<NotificationMessage> paragraphs, String buttonLabel, String buttonUrl,
-                     NotificationMessage footer, Map<String, String> params) {
+                     NotificationMessage footer, Map<String, String> params)
+    {
+        if (!user.isNotificationsEnabled() && !ESSENTIAL_TYPES.contains(type)) {
+            return;   // el usuario las desactivó: no se guarda ni se envía nada
+        }
         Map<String, String> values = new HashMap<>(params);
         values.putIfAbsent("username", user.getUsername());
 

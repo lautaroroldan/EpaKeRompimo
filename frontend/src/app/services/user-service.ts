@@ -38,4 +38,8 @@ export class UserService {
   unlinkEmail(token: string) {
     return this.http.post<void>(`${API_URL}/users/unlink-email`, null, { params: { token } });
   }
+
+  setNotificationsEnabled(id: number, enabled: boolean) {
+    return this.http.put<void>(`${API_URL}/users/${id}/notifications`, { enabled });
+  }
 }

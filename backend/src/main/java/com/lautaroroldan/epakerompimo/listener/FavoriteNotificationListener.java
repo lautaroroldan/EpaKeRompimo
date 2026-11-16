@@ -73,7 +73,7 @@ public class FavoriteNotificationListener {
     // Solo a mails confirmados: un mail pendiente todavía no cuenta
     private User findNotifiableUser(Long idUser) {
         User user = userRepository.findWithEmailById(idUser).orElse(null);
-        if (user == null || user.getEmail() == null || user.getEmail().getAddress() == null) {
+        if (user == null || !user.isNotificationsEnabled() || user.getEmail() == null || user.getEmail().getAddress() == null) {
             return null;
         }
         return user;

@@ -150,7 +150,8 @@ public class UserServiceManager implements UserService {
         UserEmail mail = user.getEmail();
         return new UserResponse(user.getIdUser(), user.getUsername(), user.getIcon(),
                 mail != null ? mail.getAddress() : null,
-                mail != null ? mail.getPendingAddress() : null);
+                mail != null ? mail.getPendingAddress() : null,
+                user.isNotificationsEnabled());
     }
 
     @Override
@@ -266,5 +267,10 @@ public class UserServiceManager implements UserService {
 
         // orphanRemoval borra la fila: se van el mail, cualquier pendiente y los tokens
         user.setEmail(null);
+    }
+    @Override
+    @Transactional
+    public void setNotificationsEnabled(Long id, boolean enabled) {
+        getOrThrow(id).setNotificationsEnabled(enabled);
     }
 }

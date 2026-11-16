@@ -12,6 +12,7 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../../services/auth-service';
 import { UserAvatar } from '../user-avatar/user-avatar';
+import { UserService } from '../../services/user-service';
 
 // Menú desplegable del usuario: favoritos, perfil y cerrar sesión en un solo lugar.
 // Es autónomo: lee la sesión, navega y cierra sesión por su cuenta.
@@ -30,9 +31,15 @@ export class UserMenu {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly users = inject(UserService);
 
   protected readonly menuOpen = signal(false);
+  protected readonly notificationsEnabled = signal(true);
+  // false hasta que llega el valor real del backend (así no se muestra un estado equivocado)
+  protected readonly notificationsLoaded = signal(false);
+  protected readonly notificationsSaving = signal(false);
   private readonly menuButton = viewChild<ElementRef<HTMLButtonElement>>('menuButton');
+
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -48,6 +55,18 @@ export class UserMenu {
       this.currentUrl();
       this.menuOpen.set(false);
     });
+
+    // Trae del backend si el usuario tiene las notificaciones activas
+    const id = this.auth.session()?.id;
+    if (id !== undefined) {
+      this.users.findById(id).subscribe({
+        next: (user) => {
+          this.notificationsEnabled.set(user.notificationsEnabled);
+          this.notificationsLoaded.set(true);
+        },
+        error: () => {},
+      });
+    }
   }
 
   protected toggleMenu() {
@@ -71,6 +90,21 @@ export class UserMenu {
     if (target && this.host.nativeElement.contains(target)) return;
 
     this.menuOpen.set(false);
+  }
+
+  protected toggleNotifications() {
+    const id = this.auth.session()?.id;
+    if (id === undefined || this.notificationsSaving()) return;
+
+    const next = !this.notificationsEnabled();
+    this.notificationsSaving.set(true);
+    this.users.setNotificationsEnabled(id, next).subscribe({
+      next: () => {
+        this.notificationsEnabled.set(next);
+        this.notificationsSaving.set(false);
+      },
+      error: () => this.notificationsSaving.set(false),
+    });
   }
 
   protected logout() {

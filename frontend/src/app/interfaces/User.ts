@@ -5,6 +5,7 @@ export interface UserResponse {
   icon: string | null;
   email: string | null;
   pendingEmail: string | null;
+    notificationsEnabled: boolean;
 }
 
 // POST /api/users/login

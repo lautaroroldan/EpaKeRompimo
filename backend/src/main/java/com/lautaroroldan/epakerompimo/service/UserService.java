@@ -25,6 +25,6 @@ public interface UserService {
 
     void resendVerification(Long id);
     void requestEmailUnlink(Long id);
-
+    void setNotificationsEnabled(Long id, boolean enabled);
     void confirmEmailUnlink(String token);
 }

@@ -10,6 +10,7 @@ import com.lautaroroldan.epakerompimo.security.AuthUtils;
 import com.lautaroroldan.epakerompimo.security.JwtService;
 import com.lautaroroldan.epakerompimo.service.UserService;
 import jakarta.validation.Valid;
+import com.lautaroroldan.epakerompimo.dto.user.NotificationPreferenceRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -106,5 +107,14 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void confirmEmailUnlink(@RequestParam String token) {
         userService.confirmEmailUnlink(token);
+    }
+    // Activa o desactiva las notificaciones por mail (solo el dueño)
+    @PutMapping("/{id}/notifications")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setNotifications(@PathVariable Long id,
+                                 @Valid @RequestBody NotificationPreferenceRequest request,
+                                 Authentication authentication) {
+        checkOwner(id, authentication);
+        userService.setNotificationsEnabled(id, request.enabled());
     }
 }
