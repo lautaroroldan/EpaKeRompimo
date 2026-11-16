@@ -40,6 +40,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/games/**", "/api/deals/**", "/api/prices/**",
                                 "/api/companies/**", "/api/stores/**", "/api/details/**",
                                 "/api/enterprises/**").permitAll()
+                        // Solo el administrador: panel de reportes, overrides y listado de cuentas
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
                         // Swagger / OpenAPI
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()

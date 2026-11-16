@@ -5,7 +5,9 @@ import com.lautaroroldan.epakerompimo.dto.user.UserRequest;
 import com.lautaroroldan.epakerompimo.dto.user.UserResponse;
 import com.lautaroroldan.epakerompimo.dto.user.UserUpdateRequest;
 import com.lautaroroldan.epakerompimo.enums.NotificationType;
+import com.lautaroroldan.epakerompimo.enums.Role;
 import com.lautaroroldan.epakerompimo.entity.User;
+import com.lautaroroldan.epakerompimo.exceptions.ForbiddenOperationException;
 import com.lautaroroldan.epakerompimo.exceptions.InvalidCredentialsException;
 import com.lautaroroldan.epakerompimo.exceptions.UserNotFoundException;
 import com.lautaroroldan.epakerompimo.exceptions.UsernameAlreadyExistsException;
@@ -76,6 +78,8 @@ public class UserServiceManager implements UserService {
         user.setUsername(request.username());
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setIcon(request.icon());
+        // El registro público nunca puede elegir rol: siempre es un usuario común.
+        user.setRole(Role.USER);
         boolean enviarVerificacion = applyEmail(user, request.email());
 
         User saved = userRepository.save(user);
@@ -130,8 +134,11 @@ public class UserServiceManager implements UserService {
     @Override
     @Transactional
     public void deleteById(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException(id);
+        User user = getOrThrow(id);
+        // Sin este chequeo alguien podría borrar la cuenta administradora y
+        // dejar la aplicación sin acceso al panel.
+        if (user.isAdmin()) {
+            throw new ForbiddenOperationException("La cuenta administradora no se puede eliminar");
         }
         // Primero los favoritos: tienen una clave foránea hacia el usuario
         favoriteGameRepository.deleteByUser_IdUser(id);
@@ -150,7 +157,8 @@ public class UserServiceManager implements UserService {
         UserEmail mail = user.getEmail();
         return new UserResponse(user.getIdUser(), user.getUsername(), user.getIcon(),
                 mail != null ? mail.getAddress() : null,
-                mail != null ? mail.getPendingAddress() : null);
+                mail != null ? mail.getPendingAddress() : null,
+                user.roleOrDefault());
     }
 
     @Override

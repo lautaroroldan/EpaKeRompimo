@@ -1,3 +1,7 @@
 package com.lautaroroldan.epakerompimo.dto.user;
 
-public record UserResponse(Long id, String username, String icon, String email, String pendingEmail) {}
+import com.lautaroroldan.epakerompimo.enums.Role;
+
+public record UserResponse(Long id, String username, String icon, String email, String pendingEmail,
+                           Role role) {
+}

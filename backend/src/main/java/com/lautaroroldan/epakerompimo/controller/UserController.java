@@ -59,7 +59,7 @@ public class UserController {
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest) {
         UserResponse user = userService.login(loginRequest);
-        return new LoginResponse(jwtService.generate(user), user.id(), user.username(), user.icon());
+        return new LoginResponse(jwtService.generate(user), user.id(), user.username(), user.icon(), user.role());
     }
 
     @GetMapping("/exists/{username}")
