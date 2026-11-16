@@ -32,6 +32,11 @@
 			<name>Pablo Walter</name>
 			<email>pablo.walter.quiroga11@gmail.com</email>
 		</developer>
+		<developer>
+			<id>ivanialonardi</id>
+			<name>Ivan IaLonardi</name>
+			<email>ivan.ariel.ialonardi@gmail.com</email>
+		</developer>
 	</developers>
 	<scm>
 		<connection>scm:git:https://github.com/lautaroroldan/EpaKeRompimo.git</connection>
