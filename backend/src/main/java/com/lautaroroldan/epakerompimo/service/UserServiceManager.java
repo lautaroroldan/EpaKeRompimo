@@ -13,6 +13,7 @@ import com.lautaroroldan.epakerompimo.exceptions.UserNotFoundException;
 import com.lautaroroldan.epakerompimo.exceptions.UsernameAlreadyExistsException;
 import com.lautaroroldan.epakerompimo.repository.FavoriteEnterpriseRepository;
 import com.lautaroroldan.epakerompimo.repository.FavoriteGameRepository;
+import com.lautaroroldan.epakerompimo.repository.MatchReportRepository;
 import com.lautaroroldan.epakerompimo.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class UserServiceManager implements UserService {
     private final UserRepository userRepository;
     private final FavoriteGameRepository favoriteGameRepository;
     private final FavoriteEnterpriseRepository favoriteEnterpriseRepository;
+    private final MatchReportRepository matchReportRepository;
     private final PasswordEncoder passwordEncoder;
     private final NotificationService notificationService;
     private final String frontendUrl;
@@ -42,6 +44,7 @@ public class UserServiceManager implements UserService {
     public UserServiceManager(UserRepository userRepository,
                               FavoriteGameRepository favoriteGameRepository,
                               FavoriteEnterpriseRepository favoriteEnterpriseRepository,
+                              MatchReportRepository matchReportRepository,
                               PasswordEncoder passwordEncoder,
                               NotificationRepository notificationRepository,
                               NotificationService notificationService,
@@ -49,6 +52,7 @@ public class UserServiceManager implements UserService {
         this.userRepository = userRepository;
         this.favoriteGameRepository = favoriteGameRepository;
         this.favoriteEnterpriseRepository = favoriteEnterpriseRepository;
+        this.matchReportRepository = matchReportRepository;
         this.notificationRepository = notificationRepository;
         this.passwordEncoder = passwordEncoder;
         this.notificationService = notificationService;
@@ -144,6 +148,7 @@ public class UserServiceManager implements UserService {
         favoriteGameRepository.deleteByUser_IdUser(id);
         favoriteEnterpriseRepository.deleteByUser_IdUser(id);
         notificationRepository.deleteByUser_IdUser(id);
+        matchReportRepository.deleteByUser_IdUser(id);
         userRepository.deleteById(id);
     }
 

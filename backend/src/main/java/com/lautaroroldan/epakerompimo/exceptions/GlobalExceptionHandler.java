@@ -70,4 +70,14 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleInvalidMatchFix(InvalidMatchFixException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
+    @ExceptionHandler(MatchReportNotFoundException.class)
+    public ProblemDetail handleMatchReportNotFound(MatchReportNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidMatchReportException.class)
+    public ProblemDetail handleInvalidMatchReport(InvalidMatchReportException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 }
