@@ -11,6 +11,11 @@ export const serverRoutes: ServerRoute[] = [
     path: 'favoritos',
     renderMode: RenderMode.Client
   },
+  // El panel de administración depende de la sesión y del rol: solo en el navegador
+  {
+    path: 'admin',
+    renderMode: RenderMode.Client
+  },
   // El perfil de juego depende de un parámetro dinámico y de datos del backend:
   // se renderiza en el servidor por request, no se puede pre-renderizar.
   {
