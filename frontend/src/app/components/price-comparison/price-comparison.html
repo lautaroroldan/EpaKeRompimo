@@ -79,7 +79,7 @@
     @if (reportOffer(); as offer) {
     <app-match-report-dialog [type]="storeLinkType" [gameTitle]="title()" [storeName]="offer.store.name"
         [currentUrl]="offer.store.urlStore" [itadGameId]="itadGameId()" [igdbGameId]="igdbGameId()"
-        (closed)="closeReport()" (saved)="closeReport()" />
+        (closed)="closeReport()" />
     }
 </section>
 }

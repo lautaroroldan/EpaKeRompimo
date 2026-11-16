@@ -108,16 +108,22 @@ export class Admin {
     const igdb = this.selectedIgdb();
     const itad = this.selectedItad();
     const store = this.storeName().trim();
+    const url = this.storeUrl().trim();
     const hide = this.hideOffer();
+
+    // Solo se manda el link si el admin realmente lo cambió, para no fijar de
+    // nuevo la URL que justamente se está reportando como incorrecta.
+    const urlChanged = url !== (report.currentUrl ?? '').trim();
+    const storeChanged = !!store && (hide || urlChanged);
 
     const request: MatchReportResolveRequest = {
       status: 'RESOLVED',
       adminNote: this.note().trim() || null,
       igdbGameId: igdb?.externalId ?? null,
       itadGameId: itad?.id ?? null,
-      storeName: store || null,
-      storeUrl: hide ? null : this.storeUrl().trim() || null,
-      hideOffer: hide && !!store,
+      storeName: storeChanged ? store : null,
+      storeUrl: storeChanged && !hide ? url || null : null,
+      hideOffer: storeChanged && hide,
     };
 
     this.save(
