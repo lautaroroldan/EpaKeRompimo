@@ -36,6 +36,11 @@ public class GameDetailService {
         return detail != null ? detail : candidate;
     }
 
+    /** Todos los candidatos de IGDB para que el admin elija el correcto. */
+    public List<GameDetailDTO> searchCandidates(String title) {
+        return gameInfoProvider.searchGame(title);
+    }
+
     /**
      * El id fijado puede haber desaparecido de IGDB; en ese caso se vuelve al
      * matcheo automático en lugar de romper la vista.

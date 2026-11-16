@@ -89,6 +89,32 @@ public class GameSearchServiceManager implements GameSearchService{
         return resolveGameId(title);
     }
 
+    // ---------- Solo para el panel de administración ----------
+
+    @Override
+    public List<GameDetailDTO> findGameCandidates(String title) {
+        return gameDetailService.searchCandidates(title);
+    }
+
+    @Override
+    public List<GameDTO> findCatalogCandidates(String title) {
+        return gameCatalogService.searchByTitle(title);
+    }
+
+    @Override
+    public List<PriceDTO> findOffersByItadId(String itadGameId, String country) {
+        if (itadGameId == null || itadGameId.isBlank()) {
+            return List.of();
+        }
+        return priceAggregationService
+                .pricesByGameId(new String[]{itadGameId}, country)
+                .getOrDefault(itadGameId, List.of())
+                .stream()
+                .filter(price -> price.salePrice() != null)
+                .sorted(Comparator.comparing(PriceDTO::salePrice))
+                .toList();
+    }
+
     /**
      * El id que fijó el administrador tiene prioridad; si no hay override, se
      * resuelve con el matcheo automático de siempre.
