@@ -111,7 +111,40 @@
         </button>
 
     </form>
-    
+
+    <div class="mt-10 border-t border-border pt-6">
+        <h2 class="mb-1 text-lg font-medium">Mis reportes</h2>
+        <p class="mb-4 text-sm text-muted-foreground">
+            Consultas que enviaste sobre descripciones o links de tienda que no coincidían.
+        </p>
+
+        @if (reportsLoading()) {
+        <p class="text-sm text-muted-foreground">Cargando…</p>
+        } @else if (reportsError(); as msg) {
+        <p class="text-sm text-destructive" role="alert">{{ msg }}</p>
+        } @else if (!reports().length) {
+        <p class="text-sm text-muted-foreground">Todavía no enviaste reportes.</p>
+        } @else {
+        <ul class="flex flex-col gap-2">
+            @for (report of reports(); track report.id) {
+            <li class="rounded-lg border border-border p-3 text-sm">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
+                        {{ typeLabel(report.type) }}
+                    </span>
+                    <span [class]="statusClasses(report.status)">{{ statusLabel(report.status) }}</span>
+                    <span class="ml-auto text-xs text-muted-foreground">{{ formatDate(report.createdAt) }}</span>
+                </div>
+                <a [routerLink]="['/game', report.gameTitle]"
+                    class="mt-1 block truncate font-medium hover:underline">{{ report.gameTitle }}</a>
+                @if (report.adminNote; as note) {
+                <p class="mt-1 text-xs text-muted-foreground">{{ note }}</p>
+                }
+            </li>
+            }
+        </ul>
+        }
+    </div>
 
     <div class="mt-10 border-t border-border pt-6">
         <h2 class="mb-1 text-lg font-medium text-destructive">Eliminar cuenta</h2>
