@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { API_URL, DEFAULT_COUNTRY } from '../config/api';
+import { API_URL } from '../config/api';
 import { Game } from '../interfaces/Game';
 import { GameDetail } from '../interfaces/GameProfile';
 import {
@@ -143,13 +143,12 @@ export class AdminService {
       });
   }
 
-  // Ofertas reales del candidato de ITAD, para ver a dónde apunta cada link
+  // Ofertas reales del candidato de ITAD, para ver a dónde apunta cada link.
+  // Sin país: el backend usa el mismo valor por defecto que la ficha del juego.
   loadItadPrices(itadGameId: string) {
     this._itadPrices.set([]);
     this.http
-      .get<PriceOffer[]>(`${this.api}/candidates/itad/${encodeURIComponent(itadGameId)}/prices`, {
-        params: { country: DEFAULT_COUNTRY },
-      })
+      .get<PriceOffer[]>(`${this.api}/candidates/itad/${encodeURIComponent(itadGameId)}/prices`)
       .subscribe({
         next: (prices) => this._itadPrices.set(prices),
         error: () => this._itadPrices.set([]),
