@@ -208,6 +208,8 @@ Returns the same `GameWithPricesDTO` shape as `/api/games`.
 are public. Every other endpoint requires a `Bearer` token.
 
 The user list (`GET /api/users`) is restricted to administrators.
+`GET /api/users/{id}` is only available to the account owner or an administrator,
+because the profile includes the email address.
 
 ### Roles
 
