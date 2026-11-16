@@ -2,8 +2,8 @@ package com.lautaroroldan.epakerompimo.service;
 
 import com.lautaroroldan.epakerompimo.dto.GameDTO;
 import com.lautaroroldan.epakerompimo.dto.GameWithPricesDTO;
-import com.lautaroroldan.epakerompimo.dto.PriceDTO;
-import com.lautaroroldan.epakerompimo.dto.game.GameDetailDTO;
+import com.lautaroroldan.epakerompimo.dto.PriceDTO;import com.lautaroroldan.epakerompimo.dto.game.GameDetailDTO;
+import com.lautaroroldan.epakerompimo.entity.GameMatchOverride;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -18,13 +18,16 @@ public class GameSearchServiceManager implements GameSearchService{
     private final GameCatalogService gameCatalogService;
     private final PriceAggregationService priceAggregationService;
     private final GameDetailService gameDetailService;
+    private final GameMatchOverrideService matchOverrideService;
 
     public GameSearchServiceManager(GameCatalogService gameCatalogService,
                                     PriceAggregationService priceAggregationService,
-                                    GameDetailService gameDetailService) {
+                                    GameDetailService gameDetailService,
+                                    GameMatchOverrideService matchOverrideService) {
         this.gameCatalogService = gameCatalogService;
         this.priceAggregationService = priceAggregationService;
         this.gameDetailService = gameDetailService;
+        this.matchOverrideService = matchOverrideService;
     }
 
     @Override
@@ -55,13 +58,13 @@ public class GameSearchServiceManager implements GameSearchService{
      */
     @Override
     public List<PriceDTO> findOffersByTitle(String title, String country) {
-        GameDTO game = preferExactTitle(gameCatalogService.searchByTitle(title), title);
-        if (game == null) {
+        String gameId = resolveGameId(title);
+        if (gameId == null) {
             return List.of();
         }
-        return priceAggregationService
-                .pricesByGameId(new String[]{game.id()}, country)
-                .getOrDefault(game.id(), List.of())
+        List<PriceDTO> offers = priceAggregationService
+                .pricesByGameId(new String[]{gameId}, country)
+                .getOrDefault(gameId, List.of())
                 .stream()
                 .filter(price -> price.salePrice() != null)
                 .sorted(Comparator.comparing(PriceDTO::salePrice))
@@ -72,6 +75,9 @@ public class GameSearchServiceManager implements GameSearchService{
                 .values()
                 .stream()
                 .toList();
+
+        // Links corregidos u ofertas ocultas por el administrador.
+        return matchOverrideService.applyStoreOverrides(title, offers);
     }
 
     /**
@@ -80,6 +86,18 @@ public class GameSearchServiceManager implements GameSearchService{
      */
     @Override
     public String findItadGameIdByTitle(String title) {
+        return resolveGameId(title);
+    }
+
+    /**
+     * El id que fijó el administrador tiene prioridad; si no hay override, se
+     * resuelve con el matcheo automático de siempre.
+     */
+    private String resolveGameId(String title) {
+        GameMatchOverride override = matchOverrideService.findGameOverride(title).orElse(null);
+        if (override != null && override.getItadGameId() != null && !override.getItadGameId().isBlank()) {
+            return override.getItadGameId();
+        }
         GameDTO game = preferExactTitle(gameCatalogService.searchByTitle(title), title);
         return game != null ? game.id() : null;
     }

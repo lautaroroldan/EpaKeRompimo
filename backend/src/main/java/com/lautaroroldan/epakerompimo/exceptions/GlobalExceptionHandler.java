@@ -65,4 +65,9 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleEmailVerification(EmailVerificationException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
+    @ExceptionHandler(InvalidMatchFixException.class)
+    public ProblemDetail handleInvalidMatchFix(InvalidMatchFixException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 }
